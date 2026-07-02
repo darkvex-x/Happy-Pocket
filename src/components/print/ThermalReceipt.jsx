@@ -87,7 +87,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
 
         {/* ── Summary Details ── */}
         <div style={s.row}>
-          <span style={s.label}>Guests:</span>
+          <span style={s.label}>Total Guests:</span>
           <span style={s.bold}>{event?.totalEntries || 0}</span>
         </div>
         <div style={s.row}>
@@ -174,7 +174,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
 
       {/* ── Amount ── */}
       <div style={{ ...s.center, margin: '8px 0' }}>
-        <div style={{ fontSize: '11px', color: '#000', fontWeight: 'bold' }}>AMOUNT RECEIVED</div>
+        <div style={{ fontSize: '11px', color: '#000', fontWeight: 'bold' }}>AMOUNT CONTRIBUTED</div>
         <div style={s.large}>
           {currency} {Number(entry?.amount || 0).toLocaleString('en-IN')}
         </div>
