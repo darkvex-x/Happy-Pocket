@@ -1,39 +1,64 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { StorageService } from '../../services/storage';
-import { ExportService } from '../../services/export';
-import { PAYMENT_METHODS } from '../../constants/paymentMethods';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Dropdown from '../../components/ui/Dropdown';
-import SearchInput from '../../components/ui/SearchInput';
-import Modal from '../../components/ui/Modal';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import { Edit2, Trash2, ChevronLeft, ChevronRight, ArrowUpDown, ChevronDown, ChevronUp, FileSpreadsheet, FileText, FileDown, Inbox } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useSearch } from '../../hooks/useSearch';
-import { useToast } from '../../components/ui/Toast';
-import EmptyState from '../../components/ui/EmptyState';
-import { debounce } from '../../utils/helpers';
+import React, { useState, useEffect, useMemo } from "react";
+import { StorageService } from "../../services/storage";
+import { ExportService } from "../../services/export";
+import { PAYMENT_METHODS } from "../../constants/paymentMethods";
+import { Card, CardContent } from "../../components/ui/Card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/Table";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import Dropdown from "../../components/ui/Dropdown";
+import SearchInput from "../../components/ui/SearchInput";
+import Modal from "../../components/ui/Modal";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import {
+  Edit2,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  ChevronDown,
+  ChevronUp,
+  FileSpreadsheet,
+  FileText,
+  FileDown,
+  Inbox,
+} from "lucide-react";
+import { cn } from "../../utils/cn";
+import { useSearch } from "../../hooks/useSearch";
+import { useToast } from "../../components/ui/Toast";
+import EmptyState from "../../components/ui/EmptyState";
+import { debounce } from "../../utils/helpers";
+import { usePermissions } from "../../context/PermissionContext";
+import { PERMISSIONS } from "../../services/permissions";
 
 export default function Database() {
   const { addToast } = useToast();
+  const { permissions } = usePermissions();
   const [events, setEvents] = useState([]);
-  const [selectedEventId, setSelectedEventId] = useState('');
+  const [selectedEventId, setSelectedEventId] = useState("");
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [receiptPrefix, setReceiptPrefix] = useState('MR-');
-  const [currency, setCurrency] = useState('₹');
+  const [receiptPrefix, setReceiptPrefix] = useState("MR-");
+  const [currency, setCurrency] = useState("₹");
 
   // Search & Filter
-  const [searchQuery, setSearchQuery] = useState('');
-  const [displayQuery, setDisplayQuery] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState('All');
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [displayQuery, setDisplayQuery] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("All");
+
   // Sort
-  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
-  
+  const [sortConfig, setSortConfig] = useState({
+    key: "createdAt",
+    direction: "desc",
+  });
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 15;
@@ -44,69 +69,70 @@ export default function Database() {
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
 
-  // Load event list
-  const loadEvents = useCallback(async () => {
-    try {
-      const settings = await StorageService.getSettings();
-      if (settings?.receiptPrefix) setReceiptPrefix(settings.receiptPrefix);
-      if (settings?.currency) setCurrency(settings.currency);
+  useEffect(() => {
+    const unsubscribeSettings = StorageService.subscribeToSettings(
+      (settings) => {
+        if (settings?.receiptPrefix) setReceiptPrefix(settings.receiptPrefix);
+        if (settings?.currency) setCurrency(settings.currency);
+      },
+    );
 
-      const allEvents = await StorageService.getEvents();
+    const unsubscribeEvents = StorageService.subscribeToEvents((allEvents) => {
       setEvents(allEvents);
-      if (allEvents.length > 0) {
-        setSelectedEventId(allEvents[0].id); // Auto-select newest
-      } else {
+      if (allEvents.length === 0) {
+        setSelectedEventId("");
+        setEntries([]);
         setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error(error);
-      setIsLoading(false);
-      addToast({
-        type: 'error',
-        title: 'Error Loading Events',
-        message: 'Could not fetch list of events.'
-      });
-    }
-  }, [addToast]);
 
-  // Load entries for selected event
-  const loadEntries = useCallback(async (eventId) => {
-    setIsLoading(true);
-    try {
-      const evEntries = await StorageService.getEntries(eventId);
-      setEntries(evEntries);
-    } catch (error) {
-      console.error(error);
-      addToast({
-        type: 'error',
-        title: 'Error Loading Entries',
-        message: 'Failed to retrieve ledger guest lists.'
+      setSelectedEventId((prevSelectedEventId) => {
+        if (
+          prevSelectedEventId &&
+          allEvents.some((event) => event.id === prevSelectedEventId)
+        ) {
+          return prevSelectedEventId;
+        }
+        return allEvents[0].id;
       });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [addToast]);
+      setCurrentPage(1);
+    });
+
+    return () => {
+      unsubscribeSettings();
+      unsubscribeEvents();
+    };
+  }, []);
 
   useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
-
-  useEffect(() => {
-    if (selectedEventId) {
-      loadEntries(selectedEventId);
-      setCurrentPage(1); // Reset page on event change
-    } else {
+    if (!selectedEventId) {
       setEntries([]);
+      setIsLoading(false);
+      return;
     }
-  }, [selectedEventId, loadEntries]);
+
+    setIsLoading(true);
+    const unsubscribeEntries = StorageService.subscribeToEntries(
+      selectedEventId,
+      (evEntries) => {
+        setEntries(evEntries);
+        setIsLoading(false);
+      },
+    );
+
+    return () => {
+      unsubscribeEntries();
+    };
+  }, [selectedEventId]);
 
   // Debounced search text state setter
   const debouncedSetSearchQuery = useMemo(
-    () => debounce((val) => {
-      setSearchQuery(val);
-      setCurrentPage(1);
-    }, 250),
-    []
+    () =>
+      debounce((val) => {
+        setSearchQuery(val);
+        setCurrentPage(1);
+      }, 250),
+    [],
   );
 
   const handleSearchChange = (e) => {
@@ -116,65 +142,79 @@ export default function Database() {
   };
 
   // Custom Hook: Standardized item searching logic
-  const searchedEntries = useSearch(entries, searchQuery, ['name', 'receiptNumber'], receiptPrefix);
+  const searchedEntries = useSearch(
+    entries,
+    searchQuery,
+    ["name", "receiptNumber"],
+    receiptPrefix,
+  );
 
   // --- PROCESSING CHAIN: Filter -> Sort -> Paginate ---
   const filteredAndSortedEntries = useMemo(() => {
     let result = [...searchedEntries];
-    
+
     // 1. Payment Method Filter
-    if (paymentFilter !== 'All') {
-      result = result.filter(e => e.paymentMethod === paymentFilter);
+    if (paymentFilter !== "All") {
+      result = result.filter((e) => e.paymentMethod === paymentFilter);
     }
-    
+
     // 2. Sort
     result.sort((a, b) => {
       let aVal = a[sortConfig.key];
       let bVal = b[sortConfig.key];
-      
-      if (sortConfig.key === 'amount' || sortConfig.key === 'receiptNumber') {
+
+      if (sortConfig.key === "amount" || sortConfig.key === "receiptNumber") {
         aVal = Number(aVal);
         bVal = Number(bVal);
       }
-      
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return sortConfig.direction === 'asc' 
-          ? aVal.localeCompare(bVal) 
+
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortConfig.direction === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
-    
+
     return result;
   }, [searchedEntries, paymentFilter, sortConfig]);
 
   const filteredTotals = useMemo(() => {
-    const totalAmount = filteredAndSortedEntries.reduce((sum, e) => sum + e.amount, 0);
+    const totalAmount = filteredAndSortedEntries.reduce(
+      (sum, e) => sum + e.amount,
+      0,
+    );
     return {
       count: filteredAndSortedEntries.length,
-      amount: totalAmount
+      amount: totalAmount,
     };
   }, [filteredAndSortedEntries]);
 
-  const totalPages = Math.ceil(filteredAndSortedEntries.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(
+    filteredAndSortedEntries.length / ITEMS_PER_PAGE,
+  );
 
   // Keyboard navigation for pagination (Left/Right Arrows)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+      if (
+        ["INPUT", "TEXTAREA", "SELECT"].includes(
+          document.activeElement?.tagName,
+        )
+      ) {
         return;
       }
-      if (e.key === 'ArrowLeft') {
-        setCurrentPage(p => Math.max(1, p - 1));
-      } else if (e.key === 'ArrowRight') {
-        setCurrentPage(p => Math.min(totalPages, p + 1));
+      if (e.key === "ArrowLeft") {
+        setCurrentPage((p) => Math.max(1, p - 1));
+      } else if (e.key === "ArrowRight") {
+        setCurrentPage((p) => Math.min(totalPages, p + 1));
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [totalPages]);
 
   const pageNumbers = useMemo(() => {
@@ -182,11 +222,11 @@ export default function Database() {
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
@@ -199,20 +239,24 @@ export default function Database() {
   }, [filteredAndSortedEntries, currentPage]);
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+      direction: prev.key === key && prev.direction === "desc" ? "asc" : "desc",
     }));
   };
 
   // --- ACTIONS ---
   const handleEditSave = async (e) => {
     e.preventDefault();
-    if (!editForm.name.trim() || !editForm.amount || Number(editForm.amount) <= 0) {
+    if (
+      !editForm.name.trim() ||
+      !editForm.amount ||
+      Number(editForm.amount) <= 0
+    ) {
       addToast({
-        type: 'error',
-        title: 'Validation Error',
-        message: 'Name and amount are required.'
+        type: "error",
+        title: "Validation Error",
+        message: "Name and amount are required.",
       });
       return;
     }
@@ -221,20 +265,19 @@ export default function Database() {
       await StorageService.updateEntry(editingEntry.id, {
         name: editForm.name.trim(),
         amount: Number(editForm.amount),
-        paymentMethod: editForm.paymentMethod
+        paymentMethod: editForm.paymentMethod,
       });
       addToast({
-        type: 'success',
-        title: 'Entry Updated',
-        message: 'Guest record updated successfully.'
+        type: "success",
+        title: "Entry Updated",
+        message: "Guest record updated successfully.",
       });
-      await loadEntries(selectedEventId);
       setEditingEntry(null);
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Update Failed',
-        message: err.message || 'Could not update guest entry.'
+        type: "error",
+        title: "Update Failed",
+        message: err.message || "Could not update guest entry.",
       });
     } finally {
       setIsEditSubmitting(false);
@@ -245,16 +288,15 @@ export default function Database() {
     try {
       await StorageService.deleteEntry(entryToDelete);
       addToast({
-        type: 'success',
-        title: 'Entry Deleted',
-        message: 'Guest contribution removed.'
+        type: "success",
+        title: "Entry Deleted",
+        message: "Guest contribution removed.",
       });
-      await loadEntries(selectedEventId);
-    } catch(err) {
+    } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Deletion Failed',
-        message: err.message || 'Could not remove guest entry.'
+        type: "error",
+        title: "Deletion Failed",
+        message: err.message || "Could not remove guest entry.",
       });
     } finally {
       setEntryToDelete(null);
@@ -263,27 +305,41 @@ export default function Database() {
 
   // --- EXPORT HELPERS ---
   const getExportContext = () => {
-    const event = events.find(e => e.id === selectedEventId);
-    return { eventName: event?.eventName, prefix: receiptPrefix, currency: '₹' };
+    const event = events.find((e) => e.id === selectedEventId);
+    return {
+      eventName: event?.eventName,
+      prefix: receiptPrefix,
+      currency: "₹",
+    };
   };
+
+  const canExportReports =
+    permissions.includes(PERMISSIONS.EXPORT_CSV) ||
+    permissions.includes(PERMISSIONS.EXPORT_EXCEL) ||
+    permissions.includes(PERMISSIONS.EXPORT_PDF);
 
   const handleExportCSV = () => {
     const { eventName, prefix, currency } = getExportContext();
     ExportService.toCSV(filteredAndSortedEntries, eventName, prefix, currency);
     addToast({
-      type: 'success',
-      title: 'CSV Exported',
-      message: `Exported ${filteredAndSortedEntries.length} items to CSV.`
+      type: "success",
+      title: "CSV Exported",
+      message: `Exported ${filteredAndSortedEntries.length} items to CSV.`,
     });
   };
 
   const handleExportExcel = () => {
     const { eventName, prefix, currency } = getExportContext();
-    ExportService.toExcel(filteredAndSortedEntries, eventName, prefix, currency);
+    ExportService.toExcel(
+      filteredAndSortedEntries,
+      eventName,
+      prefix,
+      currency,
+    );
     addToast({
-      type: 'success',
-      title: 'Excel Exported',
-      message: `Exported ${filteredAndSortedEntries.length} items to Excel.`
+      type: "success",
+      title: "Excel Exported",
+      message: `Exported ${filteredAndSortedEntries.length} items to Excel.`,
     });
   };
 
@@ -291,24 +347,36 @@ export default function Database() {
     const { eventName, prefix, currency } = getExportContext();
     ExportService.toPDF(filteredAndSortedEntries, eventName, prefix, currency);
     addToast({
-      type: 'success',
-      title: 'PDF Exported',
-      message: `Exported ${filteredAndSortedEntries.length} items to PDF.`
+      type: "success",
+      title: "PDF Exported",
+      message: `Exported ${filteredAndSortedEntries.length} items to PDF.`,
     });
   };
 
   const SortableHead = ({ label, sortKey, className }) => (
-    <TableHead 
-      className={cn("cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group px-6", className)}
+    <TableHead
+      className={cn(
+        "cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group px-6",
+        className,
+      )}
       onClick={() => handleSort(sortKey)}
     >
       <div className="flex items-center space-x-1">
-        <span className="font-semibold text-gray-700 dark:text-gray-300">{label}</span>
+        <span className="font-semibold text-gray-700 dark:text-gray-300">
+          {label}
+        </span>
         <span className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">
           {sortConfig.key === sortKey ? (
-            sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            sortConfig.direction === "asc" ? (
+              <ChevronUp size={14} />
+            ) : (
+              <ChevronDown size={14} />
+            )
           ) : (
-            <ArrowUpDown size={14} className="opacity-0 group-hover:opacity-100" />
+            <ArrowUpDown
+              size={14}
+              className="opacity-0 group-hover:opacity-100"
+            />
           )}
         </span>
       </div>
@@ -329,31 +397,37 @@ export default function Database() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCSV}
-            disabled={filteredAndSortedEntries.length === 0}
-          >
-            <FileDown size={16} className="mr-1.5 text-emerald-600" /> CSV
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportExcel}
-            disabled={filteredAndSortedEntries.length === 0}
-          >
-            <FileSpreadsheet size={16} className="mr-1.5 text-green-600" />{" "}
-            Excel
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportPDF}
-            disabled={filteredAndSortedEntries.length === 0}
-          >
-            <FileText size={16} className="mr-1.5 text-red-500" /> PDF
-          </Button>
+          {permissions.includes(PERMISSIONS.EXPORT_CSV) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={filteredAndSortedEntries.length === 0}
+            >
+              <FileDown size={16} className="mr-1.5 text-emerald-600" /> CSV
+            </Button>
+          )}
+          {permissions.includes(PERMISSIONS.EXPORT_EXCEL) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              disabled={filteredAndSortedEntries.length === 0}
+            >
+              <FileSpreadsheet size={16} className="mr-1.5 text-green-600" />
+              Excel
+            </Button>
+          )}
+          {permissions.includes(PERMISSIONS.EXPORT_PDF) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPDF}
+              disabled={filteredAndSortedEntries.length === 0}
+            >
+              <FileText size={16} className="mr-1.5 text-red-500" /> PDF
+            </Button>
+          )}
         </div>
       </div>
 
@@ -483,27 +557,31 @@ export default function Database() {
                     </TableCell>
                     <TableCell className="px-6 text-right">
                       <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setEditingEntry(entry);
-                            setEditForm({
-                              name: entry.name,
-                              amount: entry.amount,
-                              paymentMethod: entry.paymentMethod,
-                            });
-                          }}
-                          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-                          aria-label={`Edit guest entry for ${entry.name}`}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => setEntryToDelete(entry.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
-                          aria-label={`Delete guest entry for ${entry.name}`}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {permissions.includes(PERMISSIONS.EDIT_ENTRY) && (
+                          <button
+                            onClick={() => {
+                              setEditingEntry(entry);
+                              setEditForm({
+                                name: entry.name,
+                                amount: entry.amount,
+                                paymentMethod: entry.paymentMethod,
+                              });
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                            aria-label={`Edit guest entry for ${entry.name}`}
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                        )}
+                        {permissions.includes(PERMISSIONS.DELETE_ENTRIES) && (
+                          <button
+                            onClick={() => setEntryToDelete(entry.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
+                            aria-label={`Delete guest entry for ${entry.name}`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

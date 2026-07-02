@@ -1,25 +1,50 @@
-import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { StorageService } from '../../services/storage';
-import { SettingsContext } from '../../context/SettingsContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import { Save, Download, Upload, RotateCcw, Sun, Moon, Printer, Building2, Check } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useToast } from '../../components/ui/Toast';
-import { PAPER_OPTIONS, CURRENCY_OPTIONS } from '../../constants/receipt';
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useCallback,
+} from "react";
+import { StorageService } from "../../services/storage";
+import { SettingsContext } from "../../context/SettingsContext";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/Card";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import {
+  Save,
+  Download,
+  Upload,
+  RotateCcw,
+  Sun,
+  Moon,
+  Printer,
+  Building2,
+  Check,
+} from "lucide-react";
+import { cn } from "../../utils/cn";
+import { useToast } from "../../components/ui/Toast";
+import { PAPER_OPTIONS, CURRENCY_OPTIONS } from "../../constants/receipt";
+import { usePermissions } from "../../context/PermissionContext";
+import { PERMISSIONS } from "../../services/permissions";
 
 export default function Settings() {
   const { theme, toggleTheme, updateSettings } = useContext(SettingsContext);
   const { addToast } = useToast();
+  const { permissions } = usePermissions();
+  const canChangeSettings = permissions.includes(PERMISSIONS.CHANGE_SETTINGS);
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    businessName: '',
-    receiptPrefix: '',
-    currency: '₹',
-    paperWidth: '58mm',
+    businessName: "",
+    receiptPrefix: "",
+    currency: "₹",
+    paperWidth: "58mm",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -34,17 +59,17 @@ export default function Settings() {
     try {
       const s = await StorageService.getSettings();
       setForm({
-        businessName: s.businessName || '',
-        receiptPrefix: s.receiptPrefix || '',
-        currency: s.currency || '₹',
-        paperWidth: s.paperWidth || '58mm',
+        businessName: s.businessName || "",
+        receiptPrefix: s.receiptPrefix || "",
+        currency: s.currency || "₹",
+        paperWidth: s.paperWidth || "58mm",
       });
     } catch (err) {
       console.error(err);
       addToast({
-        type: 'error',
-        title: 'Error Loading Settings',
-        message: 'Could not load preferences from database.'
+        type: "error",
+        title: "Error Loading Settings",
+        message: "Could not load preferences from database.",
       });
     } finally {
       setIsLoading(false);
@@ -56,26 +81,35 @@ export default function Settings() {
   }, [loadSettings]);
 
   const handleChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
     setSaved(false);
   };
 
   const handleSave = async () => {
+    if (!canChangeSettings) {
+      addToast({
+        type: "error",
+        title: "Permission Denied",
+        message: "You do not have permission to change settings.",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       await updateSettings({ ...form, theme });
       setSaved(true);
       addToast({
-        type: 'success',
-        title: 'Settings Saved',
-        message: 'Your application preferences have been updated.'
+        type: "success",
+        title: "Settings Saved",
+        message: "Your application preferences have been updated.",
       });
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Save Failed',
-        message: err.message || 'Could not update configuration.'
+        type: "error",
+        title: "Save Failed",
+        message: err.message || "Could not update configuration.",
       });
     } finally {
       setIsSaving(false);
@@ -86,9 +120,9 @@ export default function Settings() {
   const handleBackup = async () => {
     try {
       const json = await StorageService.exportBackup();
-      const blob = new Blob([json], { type: 'application/json' });
+      const blob = new Blob([json], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `happy_pocket_backup_${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
@@ -96,15 +130,15 @@ export default function Settings() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       addToast({
-        type: 'success',
-        title: 'Backup Successful',
-        message: 'Backup JSON data file exported.'
+        type: "success",
+        title: "Backup Successful",
+        message: "Backup JSON data file exported.",
       });
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Backup Failed',
-        message: err.message || 'Could not export database state.'
+        type: "error",
+        title: "Backup Failed",
+        message: err.message || "Could not export database state.",
       });
     }
   };
@@ -115,7 +149,7 @@ export default function Settings() {
     if (!file) return;
     setPendingFile(file);
     setRestoreConfirm(true);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const handleRestoreConfirm = async () => {
@@ -124,17 +158,17 @@ export default function Settings() {
       const text = await pendingFile.text();
       const stats = await StorageService.importBackup(text);
       addToast({
-        type: 'success',
-        title: 'Restore Completed',
-        message: `Restored ${stats.eventCount} events and ${stats.entryCount} entries successfully.`
+        type: "success",
+        title: "Restore Completed",
+        message: `Restored ${stats.eventCount} events and ${stats.entryCount} entries successfully.`,
       });
       await loadSettings();
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Restore Failed',
-        message: err.message || 'Invalid JSON backup document.'
+        type: "error",
+        title: "Restore Failed",
+        message: err.message || "Invalid JSON backup document.",
       });
     } finally {
       setPendingFile(null);
@@ -147,16 +181,16 @@ export default function Settings() {
     try {
       await StorageService.resetAll();
       addToast({
-        type: 'success',
-        title: 'Database Wiped',
-        message: 'All application data has been hard-reset.'
+        type: "success",
+        title: "Database Wiped",
+        message: "All application data has been hard-reset.",
       });
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Reset Failed',
-        message: err.message || 'Failed to wipe database.'
+        type: "error",
+        title: "Reset Failed",
+        message: err.message || "Failed to wipe database.",
       });
     } finally {
       setResetConfirm(false);
@@ -165,8 +199,13 @@ export default function Settings() {
 
   // ── Toggle Group Helper ──
   const ToggleGroup = ({ options, value, onChange, className }) => (
-    <div className={cn("flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700", className)}>
-      {options.map(opt => (
+    <div
+      className={cn(
+        "flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700",
+        className,
+      )}
+    >
+      {options.map((opt) => (
         <button
           key={opt}
           type="button"
@@ -175,7 +214,7 @@ export default function Settings() {
             "px-4 py-2.5 text-sm font-semibold transition-all flex-1",
             value === opt
               ? "bg-indigo-600 text-white shadow-inner"
-              : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+              : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800",
           )}
         >
           {opt}
@@ -185,7 +224,9 @@ export default function Settings() {
   );
 
   if (isLoading) {
-    return <div className="p-8 text-center opacity-50">Loading Settings...</div>;
+    return (
+      <div className="p-8 text-center opacity-50">Loading Settings...</div>
+    );
   }
 
   return (
@@ -220,6 +261,7 @@ export default function Settings() {
               value={form.businessName}
               onChange={(e) => handleChange("businessName", e.target.value)}
               placeholder="Happy Pocket"
+              disabled={!canChangeSettings}
             />
             <p className="text-xs text-gray-400 mt-1">
               Displayed on printed receipts.
@@ -238,6 +280,7 @@ export default function Settings() {
               value={form.receiptPrefix}
               onChange={(e) => handleChange("receiptPrefix", e.target.value)}
               placeholder="Moi-"
+              disabled={!canChangeSettings}
             />
             <p className="text-xs text-gray-400 mt-1">
               Prepended to all receipt numbers (e.g., Moi-001).
@@ -253,6 +296,7 @@ export default function Settings() {
               value={form.currency}
               onChange={(v) => handleChange("currency", v)}
               className="max-w-xs"
+              disabled={!canChangeSettings}
             />
           </div>
         </CardContent>
@@ -274,7 +318,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => {
-                  if (theme === "dark") toggleTheme();
+                  if (theme === "dark" && canChangeSettings) toggleTheme();
                 }}
                 className={cn(
                   "px-4 py-2.5 text-sm font-semibold transition-all flex-1 flex items-center justify-center gap-2",
@@ -288,7 +332,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => {
-                  if (theme === "light") toggleTheme();
+                  if (theme === "light" && canChangeSettings) toggleTheme();
                 }}
                 className={cn(
                   "px-4 py-2.5 text-sm font-semibold transition-all flex-1 flex items-center justify-center gap-2",
@@ -321,6 +365,7 @@ export default function Settings() {
               value={form.paperWidth}
               onChange={(v) => handleChange("paperWidth", v)}
               className="max-w-xs"
+              disabled={!canChangeSettings}
             />
             <p className="text-xs text-gray-400 mt-2">
               Standard thermal roll widths. Most POS printers use 58mm.
@@ -336,6 +381,7 @@ export default function Settings() {
           size="lg"
           onClick={handleSave}
           isLoading={isSaving}
+          disabled={!canChangeSettings}
           className="min-w-40 shadow-md shadow-indigo-500/20"
         >
           {saved ? (

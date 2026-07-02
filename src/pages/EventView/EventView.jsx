@@ -1,11 +1,5 @@
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useMemo, useRef } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { formatDate } from "../../utils/date";
 import { StorageService } from "../../services/storage";
 import { ROUTES } from "../../constants/routes";
@@ -37,6 +31,7 @@ import {
   Banknote,
   Printer,
   Edit2,
+  Share2,
   Trash2,
   ArrowUpDown,
   ChevronUp,
@@ -49,11 +44,15 @@ import { useSearch } from "../../hooks/useSearch";
 import { usePrint } from "../../hooks/usePrint";
 import { validateEntry, validateEvent } from "../../utils/validation";
 import { useToast } from "../../components/ui/Toast";
+import { usePermissions } from "../../context/PermissionContext";
+import { PERMISSIONS } from "../../services/permissions";
 
 export default function EventView() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { shareId } = useParams();
   const { addToast } = useToast();
+  const { permissions } = usePermissions();
   const nameInputRef = useRef(null);
 
   const [activeEvent, setActiveEvent] = useState(null);
@@ -100,41 +99,69 @@ export default function EventView() {
     handleClosePrint,
   } = usePrint();
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const settings = await StorageService.getSettings();
-      if (settings?.receiptPrefix) setReceiptPrefix(settings.receiptPrefix);
-      if (settings?.currency) setCurrency(settings.currency);
+  useEffect(() => {
+    const unsubscribeSettings = StorageService.subscribeToSettings(
+      (settings) => {
+        if (settings?.receiptPrefix) setReceiptPrefix(settings.receiptPrefix);
+        if (settings?.currency) setCurrency(settings.currency);
+      },
+    );
 
-      let event = null;
-      if (location.state?.eventId) {
-        event = await StorageService.getEventById(location.state.eventId);
-      } else {
-        const events = await StorageService.getEvents();
-        if (events.length > 0) event = events[0];
-      }
-
-      if (event) {
-        setActiveEvent(event);
-        const evEntries = await StorageService.getEntries(event.id);
-        setEntries(evEntries);
-      }
-    } catch (error) {
-      console.error(error);
-      addToast({
-        type: "error",
-        title: "Loading Error",
-        message: "Could not retrieve event contributions.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [location.state?.eventId, addToast]);
+    return () => {
+      unsubscribeSettings();
+    };
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    setIsLoading(true);
+
+    const unsubscribeEvents = StorageService.subscribeToEvents((events) => {
+      let nextEvent = null;
+
+      if (shareId) {
+        nextEvent = events.find((event) => event.shareId === shareId) || null;
+      } else if (location.state?.eventId) {
+        nextEvent =
+          events.find((event) => event.id === location.state.eventId) || null;
+      } else if (events.length > 0) {
+        nextEvent = events[0];
+      }
+
+      if (!nextEvent) {
+        setActiveEvent(null);
+        setEntries([]);
+        setIsLoading(false);
+        return;
+      }
+
+      setActiveEvent(nextEvent);
+    });
+
+    return () => {
+      unsubscribeEvents();
+    };
+  }, [location.state?.eventId, shareId]);
+
+  useEffect(() => {
+    if (!activeEvent?.id) {
+      setEntries([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const unsubscribeEntries = StorageService.subscribeToEntries(
+      activeEvent.id,
+      (evEntries) => {
+        setEntries(evEntries);
+        setIsLoading(false);
+      },
+    );
+
+    return () => {
+      unsubscribeEntries();
+    };
+  }, [activeEvent?.id]);
 
   // Custom Hook: Receipt sequential serial sequence generator preview
   const nextReceiptPreview = useReceiptNumber(entries, receiptPrefix);
@@ -178,6 +205,43 @@ export default function EventView() {
     const { errors, isValid } = validateEntry(data);
     setErrors(errors);
     return isValid;
+  };
+
+  const handleShareEvent = async () => {
+    if (!activeEvent) return;
+
+    try {
+      const resolvedShareId =
+        activeEvent.shareId ||
+        (await StorageService.ensureEventShareId(activeEvent.id));
+      const shareUrl = `${window.location.origin}/event/${resolvedShareId}`;
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const tempInput = document.createElement("textarea");
+        tempInput.value = shareUrl;
+        tempInput.setAttribute("readonly", "");
+        tempInput.style.position = "fixed";
+        tempInput.style.left = "-9999px";
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+      }
+
+      addToast({
+        type: "success",
+        title: "Share Link Copied",
+        message: "The event link is ready to share.",
+      });
+    } catch (error) {
+      addToast({
+        type: "error",
+        title: "Unable to Share",
+        message: error.message || "Could not copy the event link.",
+      });
+    }
   };
 
   const handleOpenEventEdit = () => {
@@ -244,6 +308,15 @@ export default function EventView() {
 
   const handleCreateEntry = async (e) => {
     e.preventDefault();
+    if (!permissions.includes(PERMISSIONS.ADD_ENTRY)) {
+      addToast({
+        type: "error",
+        title: "Permission Denied",
+        message: "You do not have permission to add entries.",
+      });
+      return;
+    }
+
     if (!validateForm(formData, setFormErrors) || !activeEvent) {
       addToast({
         type: "error",
@@ -268,7 +341,6 @@ export default function EventView() {
         title: "Entry Recorded",
         message: `Moi of ${currency}${entryData.amount.toLocaleString("en-IN")} saved for ${entryData.name}.`,
       });
-      await loadData();
       setFormData(initialFormState);
       nameInputRef.current?.focus();
     } catch (error) {
@@ -284,6 +356,14 @@ export default function EventView() {
 
   const handleEditSave = async (e) => {
     e.preventDefault();
+    if (!permissions.includes(PERMISSIONS.EDIT_ENTRY)) {
+      addToast({
+        type: "error",
+        title: "Permission Denied",
+        message: "You do not have permission to edit entries.",
+      });
+      return;
+    }
 
     const errors = {};
     if (!editForm.name?.trim()) errors.name = "Name is required";
@@ -312,7 +392,6 @@ export default function EventView() {
         title: "Entry Updated",
         message: "The contribution entry was successfully modified.",
       });
-      await loadData();
       setEditingEntry(null);
     } catch (err) {
       addToast({
@@ -326,6 +405,15 @@ export default function EventView() {
   };
 
   const handleDeleteConfirm = async () => {
+    if (!permissions.includes(PERMISSIONS.DELETE_ENTRIES)) {
+      addToast({
+        type: "error",
+        title: "Permission Denied",
+        message: "You do not have permission to delete entries.",
+      });
+      return;
+    }
+
     try {
       await StorageService.deleteEntry(entryToDelete);
       addToast({
@@ -333,7 +421,6 @@ export default function EventView() {
         title: "Entry Removed",
         message: "Guest contribution deleted successfully.",
       });
-      await loadData();
     } catch (err) {
       addToast({
         type: "error",
@@ -384,10 +471,16 @@ export default function EventView() {
       <div className="flex h-full items-center justify-center">
         <EmptyState
           icon={CalendarDays}
-          title="No Active Event"
-          description="Create an event to start."
-          actionLabel="Create Event"
-          onAction={() => navigate(ROUTES.CREATE_EVENT)}
+          title={shareId ? "Event Not Found" : "No Active Event"}
+          description={
+            shareId
+              ? "The shared event could not be found. The link may be invalid or the event may have been removed."
+              : "Create an event to start."
+          }
+          actionLabel={shareId ? "Go Home" : "Create Event"}
+          onAction={() =>
+            navigate(shareId ? ROUTES.DASHBOARD : ROUTES.CREATE_EVENT)
+          }
         />
       </div>
     );
@@ -405,9 +498,22 @@ export default function EventView() {
             <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-bold dark:bg-emerald-900/30 dark:text-emerald-400">
               ACTIVE
             </span>
-            <Button variant="outline" size="sm" onClick={handleOpenEventEdit}>
-              <Edit2 className="mr-2" size={16} /> Edit Event
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {permissions.includes(PERMISSIONS.SHARE_EVENT) && (
+                <Button variant="outline" size="sm" onClick={handleShareEvent}>
+                  <Share2 className="mr-2" size={16} /> Share Event
+                </Button>
+              )}
+              {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenEventEdit}
+                >
+                  <Edit2 className="mr-2" size={16} /> Edit Event
+                </Button>
+              )}
+            </div>
           </div>
           <div className="text-gray-500 dark:text-gray-400 font-medium flex flex-wrap gap-4 text-sm">
             {activeEvent.brideName && activeEvent.groomName && (
@@ -563,6 +669,7 @@ export default function EventView() {
                   variant="primary"
                   className="w-full py-6 rounded-xl shadow-md text-base"
                   isLoading={isSubmitting}
+                  disabled={!permissions.includes(PERMISSIONS.ADD_ENTRY)}
                 >
                   <Banknote className="mr-2" size={20} /> Add Entry
                 </Button>
@@ -652,37 +759,47 @@ export default function EventView() {
                         </TableCell>
                         <TableCell className="pr-4 py-3 text-right">
                           <div className="flex items-center justify-end space-x-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => setPrintEntry(entry)}
-                              className="p-1.5 text-gray-400 hover:text-indigo-500 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                              title="Print Receipt"
-                              aria-label={`Print receipt for ${entry.name}`}
-                            >
-                              <Printer size={16} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingEntry(entry);
-                                setEditForm({
-                                  name: entry.name,
-                                  amount: entry.amount,
-                                  paymentMethod: entry.paymentMethod,
-                                });
-                              }}
-                              className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                              title="Edit"
-                              aria-label={`Edit entry for ${entry.name}`}
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button
-                              onClick={() => setEntryToDelete(entry.id)}
-                              className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
-                              title="Delete"
-                              aria-label={`Delete entry for ${entry.name}`}
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            {permissions.includes(
+                              PERMISSIONS.PRINT_RECEIPT,
+                            ) && (
+                              <button
+                                onClick={() => setPrintEntry(entry)}
+                                className="p-1.5 text-gray-400 hover:text-indigo-500 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                                title="Print Receipt"
+                                aria-label={`Print receipt for ${entry.name}`}
+                              >
+                                <Printer size={16} />
+                              </button>
+                            )}
+                            {permissions.includes(PERMISSIONS.EDIT_ENTRY) && (
+                              <button
+                                onClick={() => {
+                                  setEditingEntry(entry);
+                                  setEditForm({
+                                    name: entry.name,
+                                    amount: entry.amount,
+                                    paymentMethod: entry.paymentMethod,
+                                  });
+                                }}
+                                className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                                title="Edit"
+                                aria-label={`Edit entry for ${entry.name}`}
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                            )}
+                            {permissions.includes(
+                              PERMISSIONS.DELETE_ENTRIES,
+                            ) && (
+                              <button
+                                onClick={() => setEntryToDelete(entry.id)}
+                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
+                                title="Delete"
+                                aria-label={`Delete entry for ${entry.name}`}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

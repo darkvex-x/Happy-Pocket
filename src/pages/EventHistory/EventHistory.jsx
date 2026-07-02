@@ -1,53 +1,69 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { StorageService } from '../../services/storage';
-import { ROUTES } from '../../constants/routes';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import EmptyState from '../../components/ui/EmptyState';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import PrintPreviewModal from '../../components/print/PrintPreviewModal';
-import { Users, IndianRupee, Printer, ExternalLink, Copy, Trash2, CalendarHeart } from 'lucide-react';
-import { usePrint } from '../../hooks/usePrint';
-import { useToast } from '../../components/ui/Toast';
-
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { StorageService } from "../../services/storage";
+import { ROUTES } from "../../constants/routes";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import EmptyState from "../../components/ui/EmptyState";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import PrintPreviewModal from "../../components/print/PrintPreviewModal";
+import {
+  Users,
+  IndianRupee,
+  Printer,
+  ExternalLink,
+  Copy,
+  Trash2,
+  CalendarHeart,
+} from "lucide-react";
+import { usePrint } from "../../hooks/usePrint";
+import { useToast } from "../../components/ui/Toast";
+import { usePermissions } from "../../context/PermissionContext";
+import { PERMISSIONS } from "../../services/permissions";
 export default function EventHistory() {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { permissions } = usePermissions();
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currency, setCurrency] = useState('₹');
+  const [currency, setCurrency] = useState("₹");
 
   const [eventToDelete, setEventToDelete] = useState(null);
   const [isDuplicating, setIsDuplicating] = useState(false);
-  
-  // Custom Hook: Print targeting
-  const { printTarget, isPrintOpen, handlePrint: setPrintTarget, handleClosePrint } = usePrint();
 
-  const loadEvents = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [allEvents, settings] = await Promise.all([
-        StorageService.getEvents(),
-        StorageService.getSettings()
-      ]);
-      setEvents(allEvents);
-      if (settings?.currency) setCurrency(settings.currency);
-    } catch (error) {
-      console.error(error);
-      addToast({
-        type: 'error',
-        title: 'Error Loading Events',
-        message: error.message || 'Failed to query historical events.'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [addToast]);
+  // Custom Hook: Print targeting
+  const {
+    printTarget,
+    isPrintOpen,
+    handlePrint: setPrintTarget,
+    handleClosePrint,
+  } = usePrint();
 
   useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
+    setIsLoading(true);
+
+    const unsubscribeSettings = StorageService.subscribeToSettings(
+      (settings) => {
+        if (settings?.currency) setCurrency(settings.currency);
+      },
+    );
+
+    const unsubscribeEvents = StorageService.subscribeToEvents((allEvents) => {
+      setEvents(allEvents);
+      setIsLoading(false);
+    });
+
+    return () => {
+      unsubscribeSettings();
+      unsubscribeEvents();
+    };
+  }, []);
 
   const handleOpen = (eventId) => {
     navigate(ROUTES.CURRENT_EVENT, { state: { eventId } });
@@ -61,21 +77,20 @@ export default function EventHistory() {
         brideName: event.brideName,
         groomName: event.groomName,
         venue: event.venue,
-        functionDate: new Date().toISOString().split('T')[0],
-        notes: `Duplicated from ${event.eventName}`
+        functionDate: new Date().toISOString().split("T")[0],
+        notes: `Duplicated from ${event.eventName}`,
       };
       await StorageService.createEvent(copyData);
       addToast({
-        type: 'success',
-        title: 'Event Duplicated',
-        message: `Created duplicate copy of "${event.eventName}".`
+        type: "success",
+        title: "Event Duplicated",
+        message: `Created duplicate copy of "${event.eventName}".`,
       });
-      await loadEvents();
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Duplication Failed',
-        message: err.message || 'Failed to duplicate event.'
+        type: "error",
+        title: "Duplication Failed",
+        message: err.message || "Failed to duplicate event.",
       });
     } finally {
       setIsDuplicating(false);
@@ -87,16 +102,15 @@ export default function EventHistory() {
     try {
       await StorageService.deleteEvent(eventToDelete.id);
       addToast({
-        type: 'success',
-        title: 'Event Deleted',
-        message: `Ledger and entries for "${eventToDelete.eventName}" deleted.`
+        type: "success",
+        title: "Event Deleted",
+        message: `Ledger and entries for "${eventToDelete.eventName}" deleted.`,
       });
-      await loadEvents();
     } catch (err) {
       addToast({
-        type: 'error',
-        title: 'Deletion Failed',
-        message: err.message || 'Could not delete the event ledger.'
+        type: "error",
+        title: "Deletion Failed",
+        message: err.message || "Could not delete the event ledger.",
       });
     } finally {
       setEventToDelete(null);
@@ -217,16 +231,18 @@ export default function EventHistory() {
                 >
                   <ExternalLink size={16} />
                 </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs"
-                  title="Print Summary"
-                  aria-label={`Print summary receipt for ${event.eventName}`}
-                  onClick={() => handlePrintSummary(event)}
-                >
-                  <Printer size={16} />
-                </Button>
+                {permissions.includes(PERMISSIONS.PRINT_RECEIPT) && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full text-xs"
+                    title="Print Summary"
+                    aria-label={`Print summary receipt for ${event.eventName}`}
+                    onClick={() => handlePrintSummary(event)}
+                  >
+                    <Printer size={16} />
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   size="sm"
@@ -238,16 +254,18 @@ export default function EventHistory() {
                 >
                   <Copy size={16} />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
-                  title="Delete Event"
-                  aria-label={`Delete event ledger for ${event.eventName}`}
-                  onClick={() => setEventToDelete(event)}
-                >
-                  <Trash2 size={16} />
-                </Button>
+                {permissions.includes(PERMISSIONS.DELETE_EVENT) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
+                    title="Delete Event"
+                    aria-label={`Delete event ledger for ${event.eventName}`}
+                    onClick={() => setEventToDelete(event)}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           ))}
