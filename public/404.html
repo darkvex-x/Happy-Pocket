@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Redirecting…</title>
+    <script>
+      (function () {
+        const path = window.location.pathname;
+        const search = window.location.search || "";
+        const hash = window.location.hash || "";
+        const basePath = path.replace(/\/404\.html$/, "/");
+        const routePath = path === "/" ? "" : path;
+        const redirectTarget = `${window.location.origin}${basePath}#${routePath}${search}${hash}`;
+        window.location.replace(redirectTarget);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
