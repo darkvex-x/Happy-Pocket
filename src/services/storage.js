@@ -137,7 +137,7 @@ const subscribeToLocalDB = (callback) => {
   };
 };
 
-const subscribeToSortedEvents = (callback) => {
+const subscribeToSortedEvents = (callback, onError = null) => {
   if (!isFirebaseConfigured) {
     return subscribeToLocalDB((dbState) => {
       callback(
@@ -149,12 +149,23 @@ const subscribeToSortedEvents = (callback) => {
   }
 
   const q = query(getEventsCollection(), orderBy("createdAt", "desc"));
-  return onSnapshot(q, (snapshot) => {
-    callback(snapshot.docs.map(normalizeEvent));
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      callback(snapshot.docs.map(normalizeEvent));
+    },
+    (error) => {
+      console.error("Failed to subscribe to events from Firestore:", error);
+      if (onError) {
+        onError(error);
+      } else {
+        callback([]);
+      }
+    },
+  );
 };
 
-const subscribeToSortedEntries = (eventId = null, callback) => {
+const subscribeToSortedEntries = (eventId = null, callback, onError = null) => {
   if (!isFirebaseConfigured) {
     return subscribeToLocalDB((dbState) => {
       let entries = dbState.entries;
@@ -169,18 +180,28 @@ const subscribeToSortedEntries = (eventId = null, callback) => {
     });
   }
 
-  let q = query(getEntriesCollection(), orderBy("createdAt", "desc"));
+  let q = query(getEntriesCollection());
   if (eventId) {
-    q = query(
-      getEntriesCollection(),
-      where("eventId", "==", eventId),
-      orderBy("createdAt", "desc"),
-    );
+    q = query(getEntriesCollection(), where("eventId", "==", eventId));
   }
 
-  return onSnapshot(q, (snapshot) => {
-    callback(snapshot.docs.map(normalizeEntry));
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const entries = snapshot.docs.map(normalizeEntry);
+      callback(
+        entries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+      );
+    },
+    (error) => {
+      console.error("Failed to subscribe to entries from Firestore:", error);
+      if (onError) {
+        onError(error);
+      } else {
+        callback([]);
+      }
+    },
+  );
 };
 
 const getSortedEntries = async (eventId = null) => {
@@ -221,10 +242,11 @@ export const StorageService = {
     });
   },
 
-  subscribeToEvents: (callback) => subscribeToSortedEvents(callback),
+  subscribeToEvents: (callback, onError) =>
+    subscribeToSortedEvents(callback, onError),
 
-  subscribeToEntries: (eventId = null, callback) =>
-    subscribeToSortedEntries(eventId, callback),
+  subscribeToEntries: (eventId = null, callback, onError) =>
+    subscribeToSortedEntries(eventId, callback, onError),
 
   getSettings: async () => {
     if (!isFirebaseConfigured) {

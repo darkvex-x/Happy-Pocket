@@ -58,6 +58,7 @@ export default function EventView() {
   const [activeEvent, setActiveEvent] = useState(null);
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   // Create Form State
   const initialFormState = {
@@ -114,28 +115,42 @@ export default function EventView() {
 
   useEffect(() => {
     setIsLoading(true);
+    setLoadError("");
 
-    const unsubscribeEvents = StorageService.subscribeToEvents((events) => {
-      let nextEvent = null;
+    const unsubscribeEvents = StorageService.subscribeToEvents(
+      (events) => {
+        let nextEvent = null;
 
-      if (shareId) {
-        nextEvent = events.find((event) => event.shareId === shareId) || null;
-      } else if (location.state?.eventId) {
-        nextEvent =
-          events.find((event) => event.id === location.state.eventId) || null;
-      } else if (events.length > 0) {
-        nextEvent = events[0];
-      }
+        if (shareId) {
+          nextEvent = events.find((event) => event.shareId === shareId) || null;
+        } else if (location.state?.eventId) {
+          nextEvent =
+            events.find((event) => event.id === location.state.eventId) || null;
+        } else if (events.length > 0) {
+          nextEvent = events[0];
+        }
 
-      if (!nextEvent) {
+        if (!nextEvent) {
+          setActiveEvent(null);
+          setEntries([]);
+          setIsLoading(false);
+          setLoadError("");
+          return;
+        }
+
+        setActiveEvent(nextEvent);
+        setLoadError("");
+      },
+      (error) => {
+        console.error("Failed to load event data from Firestore:", error);
         setActiveEvent(null);
         setEntries([]);
         setIsLoading(false);
-        return;
-      }
-
-      setActiveEvent(nextEvent);
-    });
+        setLoadError(
+          "Unable to load event data from Firestore. Please refresh the page and try again.",
+        );
+      },
+    );
 
     return () => {
       unsubscribeEvents();
@@ -146,15 +161,26 @@ export default function EventView() {
     if (!activeEvent?.id) {
       setEntries([]);
       setIsLoading(false);
+      setLoadError("");
       return;
     }
 
     setIsLoading(true);
+    setLoadError("");
     const unsubscribeEntries = StorageService.subscribeToEntries(
       activeEvent.id,
       (evEntries) => {
         setEntries(evEntries);
         setIsLoading(false);
+        setLoadError("");
+      },
+      (error) => {
+        console.error("Failed to load guest entries from Firestore:", error);
+        setEntries([]);
+        setIsLoading(false);
+        setLoadError(
+          "Unable to load guest entries from Firestore. Please refresh the page and try again.",
+        );
       },
     );
 
@@ -460,6 +486,19 @@ export default function EventView() {
       </div>
     </TableHead>
   );
+
+  if (loadError) {
+    return (
+      <div className="p-8 text-center">
+        <div className="text-sm font-semibold text-red-600 dark:text-red-400">
+          Unable to load event data
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          {loadError}
+        </p>
+      </div>
+    );
+  }
 
   if (isLoading)
     return (
