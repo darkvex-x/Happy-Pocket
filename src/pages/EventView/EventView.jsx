@@ -240,7 +240,10 @@ export default function EventView() {
       const resolvedShareId =
         activeEvent.shareId ||
         (await StorageService.ensureEventShareId(activeEvent.id));
-      const shareUrl = `${window.location.origin}/event/${resolvedShareId}`;
+      const shareUrl = `${window.location.origin}/#${ROUTES.EVENT_BY_SHARE.replace(
+        ":shareId",
+        resolvedShareId,
+      )}`;
 
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareUrl);

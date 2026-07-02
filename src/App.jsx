@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "./context/SettingsContext";
 import { EventProvider } from "./context/EventContext";
 import { ToastProvider } from "./components/ui/Toast";
@@ -29,7 +29,7 @@ function App() {
       <ToastProvider>
         <EventProvider>
           <PermissionProvider>
-            <BrowserRouter>
+            <HashRouter>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<MainLayout />}>
@@ -52,7 +52,7 @@ function App() {
                   </Route>
                 </Routes>
               </Suspense>
-            </BrowserRouter>
+            </HashRouter>
           </PermissionProvider>
         </EventProvider>
       </ToastProvider>
