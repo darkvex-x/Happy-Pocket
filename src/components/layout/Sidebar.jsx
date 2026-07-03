@@ -21,7 +21,18 @@ export default function Sidebar() {
           className="w-9 h-9 object-contain flex-shrink-0"
         />
         <h1
-          style={{ fontFamily: '"Bree serif",cursive' }}
+          style={{
+    fontFamily: "'Sekuya', serif",
+    fontSize: "25px",
+    fontWeight: "700",
+    background: "linear-gradient(90deg,#4b148c,#ff0a7a)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    margin: 7,
+    letterSpacing: "-0.5px",
+    textShadow: "0 2px 5px rgba(0,0,0,0.2)"
+  }}
+
           className="hidden lg:block ml-3 text-xl font-bold text-gray-900 dark:text-white truncate"
         >
           Digi Moi
