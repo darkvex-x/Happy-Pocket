@@ -109,7 +109,9 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
 
         {/* ── Footer ── */}
         <div style={s.footer}>
-          <div style={s.bold}>Thank You</div>
+          <div style={s.bold}>Thank You 💕</div>
+          <div style={s.bold}>Powered by Digi Moi </div>
+          <div style={s.bold}>Contact us📞:+91 93424 80687</div>
         </div>
       </div>
     );
@@ -124,7 +126,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
 
       {/* ── Business Header ── */}
       <div style={s.center}>
-        <div style={s.bold}>Moi Contribution Receipt</div>
+        <div style={s.bold}>Moi Contribution Receipt💗</div>
       </div>
 
       <div style={s.divider} />
@@ -174,7 +176,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
 
       {/* ── Amount ── */}
       <div style={{ ...s.center, margin: '8px 0' }}>
-        <div style={{ fontSize: '11px', color: '#000', fontWeight: 'bold' }}>AMOUNT CONTRIBUTED</div>
+        <div style={{ fontSize: '11px', color: '#000', fontWeight: 'bold' }}>AMOUNT CONTRIBUTED💝</div>
         <div style={s.large}>
           {currency} {Number(entry?.amount || 0).toLocaleString('en-IN')}
         </div>
@@ -184,8 +186,9 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
 
       {/* ── Footer ── */}
       <div style={s.footer}>
-        <div>Thank you for your blessings!</div>
+        <div>Thank you for your blessings!💕</div>
         <div style={{ marginTop: '4px', fontWeight: 'bold' }}>Powered by Digi Moi</div>
+        <div style={s.bold}> Contact us📞:+91 93424 80687</div>
       </div>
     </div>
   );

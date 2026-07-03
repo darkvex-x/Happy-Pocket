@@ -129,141 +129,355 @@ const toExcel = (entries, eventName, prefix, currency) => {
   XLSX.writeFile(wb, `${sanitizeFilename(eventName)}_${timestamp()}.xlsx`);
 };
 
+// ── PDF Helpers ───────────────────────────────────────────────────
+
+const loadImage = (url) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = url;
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+  });
+};
+
+const drawHeart = (doc, x, y, r, fillColor = [236, 72, 153]) => {
+  doc.saveGraphicsState();
+  doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
+  doc.setDrawColor(fillColor[0], fillColor[1], fillColor[2]);
+  doc.ellipse(x - r, y, r, r, 'F');
+  doc.ellipse(x + r, y, r, r, 'F');
+  doc.triangle(x - 2 * r, y, x + 2 * r, y, x, y + 2.2 * r, 'F');
+  doc.restoreGraphicsState();
+};
+
+const formatEventDate = (dateStr) => {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+};
+
+const drawGrandTotal = (doc, yStart, totalGuests, totalCollection, currency) => {
+  const x = 15;
+  const w = 180;
+  const h = 24;
+
+  // Light purple background
+  doc.setFillColor(248, 247, 255);
+  doc.roundedRect(x, yStart, w, h, 3, 3, 'F');
+
+  // Left accent bar in Purple
+  doc.setFillColor(91, 61, 245);
+  doc.rect(x, yStart, 3, h, 'F');
+
+  // Text details
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(91, 61, 245); // Purple
+  doc.text('GRAND TOTAL', x + 8, yStart + 8);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(75, 85, 99); // Gray-600
+  doc.text(`Total Guests: ${totalGuests}`, x + 8, yStart + 16);
+
+  // Right side large total value
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(236, 72, 153); // Pink
+  const totalVal = `${currency} ${totalCollection.toLocaleString('en-IN')}`;
+  const totalWidth = doc.getTextWidth(totalVal);
+  doc.text(totalVal, x + w - 8 - totalWidth, yStart + 14);
+
+  return yStart + h;
+};
+
+const drawFinalFooter = (doc, yStart) => {
+  // Divider line
+  doc.setDrawColor(229, 231, 235);
+  doc.setLineWidth(0.4);
+  doc.line(15, yStart, 195, yStart);
+
+  // Thank You centered with stylish times bolditalic font
+  const thankYouText = 'Thank You ';
+  doc.setFont('times', 'bolditalic');
+  doc.setFontSize(15);
+  doc.setTextColor(91, 61, 245); // Purple
+
+  const textWidth = doc.getTextWidth(thankYouText);
+  const thankYouX = 105 - (textWidth + 6) / 2;
+  doc.text(thankYouText, thankYouX, yStart + 10);
+
+  // Draw pink heart next to Thank You
+  drawHeart(doc, thankYouX + textWidth + 3, yStart + 8, 1.8, [236, 72, 153]);
+
+  // Subtitle with stylish times italic font
+  doc.setFont('times', 'italic');
+  doc.setFontSize(10);
+  doc.setTextColor(107, 114, 128);
+  const subText = 'Thank you for trusting Digi Moi.';
+  doc.text(subText, 105 - doc.getTextWidth(subText) / 2, yStart + 16);
+
+  // Balanced footer details (2-column layout, no contact info)
+  const colY = yStart + 26;
+
+  // Column 1: Generated On (Left-aligned)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(156, 163, 175);
+  doc.text('GENERATED ON', 15, colY);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(75, 85, 99);
+  const today = new Date();
+  const printDate = today.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  const printTime = today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  doc.text(printDate, 15, colY + 5.5);
+  doc.text(printTime, 15, colY + 10);
+
+  // Column 2: Powered By (Right-aligned)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(156, 163, 175);
+  const powText1 = 'POWERED BY';
+  const rightAlignX = 195;
+  doc.text(powText1, rightAlignX - doc.getTextWidth(powText1), colY);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(91, 61, 245);
+  const powText2 = 'Digi Moi';
+  doc.text(powText2, rightAlignX - doc.getTextWidth(powText2), colY + 6);
+};
+
 // ── PDF Export ─────────────────────────────────────────────────────
 
-const toPDF = (entries, eventName, prefix, currency) => {
+const toPDF = async (entries, eventInput, prefix, currency) => {
   if (!entries?.length) return;
+
+  const event = typeof eventInput === 'string' ? { eventName: eventInput } : eventInput;
+  const eventName = event?.eventName || 'Event Ledger';
 
   currency = sanitizeCurrency(currency);
 
   const { headers, data, totalAmount } = toRows(entries, prefix, currency);
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageHeight = doc.internal.pageSize.height;
 
-  // ── Header Left Accent Bar ──
-  doc.setFillColor(79, 70, 229); // Indigo-600 primary accent
-  doc.rect(15, 15, 4, 18, 'F');
+  // ── 1. Load Digi Moi Logo ──
+  const logoImg = await loadImage('/logo-full.png');
 
-  // ── Header Text Section ──
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(15, 23, 42); // Slate-900
-  doc.text(stripNonAscii(eventName) || 'Event Ledger', 23, 20);
-
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 116, 139); // Slate-500
-  const printDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  doc.text(`Generated on ${printDate}`, 23, 26);
-
-  // ── Header Divider Line ──
-  doc.setDrawColor(203, 213, 225); // Slate-300
-  doc.setLineWidth(0.5);
-  doc.line(15, 32, 195, 32);
-
-  // ── Summary Cards Section ──
-  const summaryY = 37;
-  const cardW = 56;
-  const cardH = 16;
-  const cardGap = 6;
-  const totalCards = 3;
-
-  const avgGift = Math.round(totalAmount / entries.length);
-
-  const cardData = [
-    { title: 'TOTAL COLLECTION', value: `${currency} ${totalAmount.toLocaleString('en-IN')}` },
-    { title: 'TOTAL GUESTS', value: `${entries.length}` },
-    { title: 'AVERAGE CONTRIBUTION', value: `${currency} ${avgGift.toLocaleString('en-IN')}` }
-  ];
-
-  for (let idx = 0; idx < totalCards; idx++) {
-    const cardX = 15 + idx * (cardW + cardGap);
-    
-    // Draw background block
-    doc.setFillColor(241, 245, 249); // Slate-100
-    doc.rect(cardX, summaryY, cardW, cardH, 'F');
-    
-    // Draw border line
-    doc.setDrawColor(203, 213, 225); // Slate-300
-    doc.setLineWidth(0.3);
-    doc.rect(cardX, summaryY, cardW, cardH, 'S');
-
-    // Title label
-    doc.setFontSize(7);
+  // ── 2. First Page Full Branded Header ──
+  if (logoImg) {
+    doc.addImage(logoImg, 'PNG', 15, 15, 45, 15);
+  } else {
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(71, 85, 105); // Slate-600
-    doc.text(cardData[idx].title, cardX + 4, summaryY + 5);
-
-    // Value label
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(15, 23, 42); // Slate-900
-    doc.text(cardData[idx].value, cardX + 4, summaryY + 12);
+    doc.setFontSize(22);
+    doc.setTextColor(91, 61, 245);
+    doc.text('Digi Moi', 15, 25);
   }
 
-  // ── Data Table ──
+  // Right side: Slogan & Contact Info
+  doc.setFont('times', 'italic');
+  doc.setFontSize(11);
+  doc.setTextColor(236, 72, 153); // Pink #EC4899
+  const slogan = 'Sweet collection, Happy celebration';
+  doc.text(slogan, 195 - doc.getTextWidth(slogan), 17);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(75, 85, 99); // Slate-600
+  const emailStr = 'Email id: digimoi.official@gmail.com';
+  const contactStr = 'Contact us: +91 93424 80687';
+  doc.text(emailStr, 195 - doc.getTextWidth(emailStr), 23);
+  doc.text(contactStr, 195 - doc.getTextWidth(contactStr), 28);
+
+  // Dashed Divider with center Heart
+  doc.setDrawColor(209, 213, 219); // Gray-300
+  doc.setLineWidth(0.4);
+  doc.setLineDashPattern([2, 2], 0);
+  doc.line(15, 34, 195, 34);
+  doc.setLineDashPattern([], 0); // Reset
+
+  // Draw pink heart in center of divider
+  drawHeart(doc, 105, 34, 1.5, [236, 72, 153]);
+
+  // Event Name & Date
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.setTextColor(17, 24, 39); // Gray-900
+  const evTitle = eventName;
+  doc.text(evTitle, 105 - doc.getTextWidth(evTitle) / 2, 42);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  doc.setTextColor(107, 114, 128); // Gray-500
+  const evDate = `Date: ${formatEventDate(event?.functionDate)}`;
+  doc.text(evDate, 105 - doc.getTextWidth(evDate) / 2, 48);
+
+  // Summary Cards
+  const cardY = 53;
+  const cardW = 56;
+  const cardH = 16;
+
+  // Card 1: Total Guests
+  doc.setFillColor(248, 247, 255); // Light purple
+  doc.roundedRect(15, cardY, cardW, cardH, 3, 3, 'F');
+  doc.setDrawColor(91, 61, 245); // Purple border
+  doc.setLineWidth(0.25);
+  doc.roundedRect(15, cardY, cardW, cardH, 3, 3, 'S');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(91, 61, 245);
+  doc.text('TOTAL GUESTS', 15 + 4, cardY + 5.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11.5);
+  doc.setTextColor(17, 24, 39);
+  doc.text(String(entries.length), 15 + 4, cardY + 12);
+
+  // Card 2: Total Collection
+  doc.setFillColor(255, 245, 249); // Light pink
+  doc.roundedRect(77, cardY, cardW, cardH, 3, 3, 'F');
+  doc.setDrawColor(236, 72, 153); // Pink border
+  doc.roundedRect(77, cardY, cardW, cardH, 3, 3, 'S');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(236, 72, 153);
+  doc.text('TOTAL COLLECTION', 77 + 4, cardY + 5.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11.5);
+  doc.setTextColor(17, 24, 39);
+  doc.text(`${currency} ${totalAmount.toLocaleString('en-IN')}`, 77 + 4, cardY + 12);
+
+  // Card 3: Total Receipts
+  doc.setFillColor(248, 247, 255); // Light purple
+  doc.roundedRect(139, cardY, cardW, cardH, 3, 3, 'F');
+  doc.setDrawColor(91, 61, 245); // Purple border
+  doc.roundedRect(139, cardY, cardW, cardH, 3, 3, 'S');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(91, 61, 245);
+  doc.text('TOTAL RECEIPTS', 139 + 4, cardY + 5.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11.5);
+  doc.setTextColor(17, 24, 39);
+  doc.text(String(entries.length), 139 + 4, cardY + 12);
+
+  // ── 3. Table Starts ──
   autoTable(doc, {
-    startY: 58,
+    startY: 74,
+    margin: { top: 26, left: 15, right: 15 },
     head: [headers],
     body: data.map(row => [
-      stripNonAscii(row[0]),           // Receipt Number
-      stripNonAscii(row[1]),           // Guest Name
-      `${currency} ${Number(row[2]).toLocaleString('en-IN')}`,  // Amount formatted
-      stripNonAscii(row[3]),           // Payment Method
-      row[4],                          // Date
-      row[5],                          // Time
+      stripNonAscii(row[0]),
+      stripNonAscii(row[1]),
+      `${currency} ${Number(row[2]).toLocaleString('en-IN')}`,
+      stripNonAscii(row[3]),
+      row[4],
+      row[5],
     ]),
-    foot: [['', 'TOTAL', `${currency} ${totalAmount.toLocaleString('en-IN')}`, '', '', '']],
     theme: 'striped',
     styles: {
       font: 'helvetica',
-      fontSize: 9,
-      cellPadding: 3,
-      lineColor: [203, 213, 225], // slate-300
+      fontSize: 8.5,
+      cellPadding: 3.5,
+      lineColor: [229, 231, 235],
       lineWidth: 0.1,
     },
     headStyles: {
-      fillColor: [79, 70, 229],    // Indigo-600 (strong, visible header)
-      textColor: [255, 255, 255],   // White text for contrast
+      fillColor: [91, 61, 245], // Purple #5B3DF5
+      textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 9,
-      cellPadding: 4,
-    },
-    footStyles: {
-      fillColor: [226, 232, 240], // Slate-200 (visible total row)
-      textColor: [15, 23, 42],
-      fontStyle: 'bold',
-      fontSize: 9,
+      fontSize: 8.5,
       cellPadding: 4,
     },
     alternateRowStyles: {
-      fillColor: [241, 245, 249], // Slate-100 alternate rows
+      fillColor: [250, 249, 255],
     },
     columnStyles: {
-      0: { halign: 'left', cellWidth: 25 },   // Receipt Number
-      1: { halign: 'left', cellWidth: 55 },   // Guest Name
-      2: { halign: 'right', cellWidth: 30 },  // Amount
-      3: { halign: 'center', cellWidth: 25 }, // Payment Method
-      4: { halign: 'center', cellWidth: 25 }, // Date
-      5: { halign: 'center', cellWidth: 20 }, // Time
+      0: { halign: 'left', cellWidth: 25 },
+      1: { halign: 'left', cellWidth: 55 },
+      2: { halign: 'right', cellWidth: 30 },
+      3: { halign: 'center', cellWidth: 25 },
+      4: { halign: 'center', cellWidth: 25 },
+      5: { halign: 'center', cellWidth: 20 },
     },
-    margin: { left: 15, right: 15 },
+    rowPageBreak: 'avoid',
   });
 
-  // ── Footer Page Numbering ──
+  // ── 4. Grand Total & Thank You Footer on Final Page ──
+  let finalY = doc.lastAutoTable.finalY + 10;
+
+  if (finalY + 24 > pageHeight - 15) {
+    doc.addPage();
+    finalY = 26;
+  }
+
+  // Draw Grand Total block
+  finalY = drawGrandTotal(doc, finalY, entries.length, totalAmount, currency);
+
+  if (finalY + 45 > pageHeight - 10) {
+    doc.addPage();
+    finalY = 26;
+  }
+
+  // Draw final footer
+  const footerYStart = pageHeight - 50;
+  drawFinalFooter(doc, footerYStart);
+
+  // ── 5. Post-Process Header & Accent Bar Overlay ──
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184); // slate-400
-    doc.setFont('helvetica', 'normal');
-    
-    // Left footer branding
-    doc.text('Digi Moi - Wedding Moi Management System', 15, doc.internal.pageSize.height - 10);
-    
-    // Right footer page count
-    const pageStr = `Page ${i} of ${pageCount}`;
-    doc.text(pageStr, doc.internal.pageSize.width - 15 - doc.getTextWidth(pageStr), doc.internal.pageSize.height - 10);
+
+    // Colored Accent Bars
+    doc.setFillColor(91, 61, 245);
+    doc.rect(0, 0, 210, 4, 'F');
+    doc.setFillColor(236, 72, 153);
+    doc.rect(0, 4, 210, 1.5, 'F');
+
+    if (i === 1) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(156, 163, 175);
+      const pageStr = `Page 1 of ${pageCount}`;
+      doc.text(pageStr, 195 - doc.getTextWidth(pageStr), pageHeight - 10);
+    } else {
+      // Compact page header
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.3);
+      doc.line(15, 10, 195, 10);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(91, 61, 245);
+      doc.text('Digi Moi', 15, 14.5);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(107, 114, 128);
+      const pageStr = `Page ${i} of ${pageCount}`;
+      doc.text(pageStr, 195 - doc.getTextWidth(pageStr), 14.5);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(75, 85, 99);
+      doc.text(eventName, 15, 19.5);
+
+      const dateStr = `Date: ${formatEventDate(event?.functionDate)}`;
+      doc.text(dateStr, 195 - doc.getTextWidth(dateStr), 19.5);
+
+      doc.line(15, 22, 195, 22);
+    }
   }
 
   doc.save(`${sanitizeFilename(eventName)}_${timestamp()}.pdf`);

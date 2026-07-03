@@ -340,14 +340,28 @@ export default function Database() {
     });
   };
 
-  const handleExportPDF = () => {
-    const { eventName, prefix, currency } = getExportContext();
-    ExportService.toPDF(filteredAndSortedEntries, eventName, prefix, currency);
-    addToast({
-      type: "success",
-      title: "PDF Exported",
-      message: `Exported ${filteredAndSortedEntries.length} items to PDF.`,
-    });
+  const handleExportPDF = async () => {
+    const event = events.find((e) => e.id === selectedEventId);
+    try {
+      await ExportService.toPDF(
+        filteredAndSortedEntries,
+        event,
+        receiptPrefix,
+        currency,
+      );
+      addToast({
+        type: "success",
+        title: "PDF Exported",
+        message: `Exported ${filteredAndSortedEntries.length} items to PDF.`,
+      });
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      addToast({
+        type: "error",
+        title: "Export Failed",
+        message: "Failed to generate the PDF report.",
+      });
+    }
   };
 
   const SortableHead = ({ label, sortKey, className }) => (

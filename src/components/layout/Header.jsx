@@ -40,28 +40,28 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 border-b border-gray-200 dark:border-gray-800 bg-[var(--card)] flex items-center justify-between px-4 md:px-6 sticky top-0 z-40 bg-opacity-90 backdrop-blur-md">
+    <header className="h-16 border-b border-slate-800 bg-slate-900 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40 bg-opacity-95 backdrop-blur-md text-white">
       <div className="flex items-center text-sm font-medium">
         {breadcrumbs.map((crumb, index) => (
           <React.Fragment key={index}>
             <span
               className={
                 index === breadcrumbs.length - 1
-                  ? "text-gray-900 dark:text-gray-100 font-semibold cursor-default"
-                  : "text-gray-500 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "text-white font-semibold cursor-default"
+                  : "text-slate-400 cursor-pointer hover:text-white transition-colors"
               }
             >
               {crumb}
             </span>
             {index < breadcrumbs.length - 1 && (
-              <ChevronRight size={16} className="text-gray-400 mx-1.5" />
+              <ChevronRight size={16} className="text-slate-500 mx-1.5" />
             )}
           </React.Fragment>
         ))}
       </div>
 
       <div className="flex items-center space-x-4">
-        <div className="hidden sm:block text-sm text-gray-500 font-medium">
+        <div className="hidden sm:block text-sm text-slate-400 font-medium">
           {new Date().toLocaleDateString("en-US", {
             weekday: "short",
             month: "short",
@@ -70,14 +70,14 @@ export default function Header() {
         </div>
         <button
           onClick={toggleTheme}
-          className="p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300 active:scale-95"
+          className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-755 dark:bg-slate-800 dark:hover:bg-slate-700 transition-all text-slate-300 hover:text-white active:scale-95 border border-slate-800/80 shadow-sm"
           aria-label="Toggle Theme"
         >
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </button>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+          className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-slate-700 hover:text-white active:scale-95 shadow-sm"
           aria-label="Logout"
         >
           <LogOut size={16} />

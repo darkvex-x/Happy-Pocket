@@ -3,11 +3,11 @@ import { cn } from '../../utils/cn';
 
 const Button = forwardRef(({ className, variant = 'primary', size = 'default', isLoading, children, ...props }, ref) => {
   const variants = {
-    primary: "bg-[var(--color-primary-600)] text-white hover:bg-[var(--color-primary-500)] shadow-sm",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
-    outline: "border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
-    ghost: "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
-    danger: "bg-red-600 text-white hover:bg-red-500 shadow-sm"
+    primary: "bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white font-semibold shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 active:scale-[0.98] transition-all duration-300 hover:scale-[1.02] rounded-xl",
+    secondary: "bg-slate-800 text-slate-100 hover:bg-slate-700/90 border border-slate-700/50 shadow-md active:scale-[0.98] transition-all duration-300 rounded-xl",
+    outline: "border border-slate-700 bg-transparent hover:bg-slate-800/60 text-slate-200 shadow-sm active:scale-[0.98] transition-all duration-300 rounded-xl",
+    ghost: "bg-transparent hover:bg-slate-800/40 text-slate-300 active:scale-[0.98] transition-all duration-300 rounded-xl",
+    danger: "bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white font-semibold shadow-lg shadow-red-500/10 active:scale-[0.98] transition-all duration-300 rounded-xl"
   };
   
   const sizes = {
