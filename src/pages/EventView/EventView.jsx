@@ -847,7 +847,7 @@ export default function EventView() {
                 className="max-w-xs h-9 bg-white dark:bg-gray-900"
               />
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 340px)' }}>
               {filteredAndSortedEntries.length === 0 ? (
                 <EmptyState
                   icon={Inbox}

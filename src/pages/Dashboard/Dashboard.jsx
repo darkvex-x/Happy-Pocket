@@ -120,7 +120,7 @@ export default function Dashboard() {
             style={{ fontFamily: '"Lemon",Aerial' }}
             className="text-gray-500 dark:text-gray-400 mt-1"
           >
-            Welcome back to Happy Pocket. Here is your summary.
+            Welcome back to Digi Moi. Here is your summary.
           </p>
         </div>
         {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
@@ -191,7 +191,7 @@ export default function Dashboard() {
             View All <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 430px)', minHeight: '200px' }}>
           {isLoading ? (
             <div className="p-6 space-y-4">
               <Skeleton className="h-10 w-full" />
@@ -216,7 +216,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-white dark:bg-gray-900 z-10">
                 <TableRow>
                   <TableHead>Event Name</TableHead>
                   <TableHead className="hidden md:table-cell">Date</TableHead>

@@ -125,7 +125,14 @@ export default function EventHistory() {
     <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300 pb-20">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Event History</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">Event History</h1>
+            {!isLoading && events.length > 0 && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                {events.length} {events.length === 1 ? "event" : "events"}
+              </span>
+            )}
+          </div>
           <p
             style={{ fontFamily: '"Lemon",Aerial' }}
             className="text-gray-500 dark:text-gray-400 mt-1"
@@ -155,8 +162,9 @@ export default function EventHistory() {
           />
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {events.map((event) => (
+        <div className="overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-4">
+            {events.map((event) => (
             <Card
               key={event.id}
               className="border-0 shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 flex flex-col group hover:shadow-md transition-shadow relative overflow-hidden"
@@ -273,6 +281,7 @@ export default function EventHistory() {
               </CardFooter>
             </Card>
           ))}
+          </div>
         </div>
       )}
 

@@ -17,14 +17,14 @@ export default function Sidebar() {
       <div className="p-4 lg:p-6 h-16 flex items-center justify-center lg:justify-start border-b border-transparent">
         <img
           src="/logo-icon.png"
-          alt="Happy Pocket"
+          alt="Digi Moi"
           className="w-9 h-9 object-contain flex-shrink-0"
         />
         <h1
           style={{ fontFamily: '"Bree serif",cursive' }}
           className="hidden lg:block ml-3 text-xl font-bold text-gray-900 dark:text-white truncate"
         >
-          Happy Pocket
+          Digi Moi
         </h1>
       </div>
 

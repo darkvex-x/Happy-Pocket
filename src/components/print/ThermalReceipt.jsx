@@ -57,7 +57,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
       <div ref={ref} style={s.page} className="thermal-receipt-root">
         {/* ── Logo ── */}
         <div style={{ ...s.center, marginBottom: '6px' }}>
-          <img src="/logo-full.png" alt="Happy Pocket" style={{ width: paperWidth === '80mm' ? '60mm' : '44mm', height: 'auto', margin: '0 auto', display: 'block' }} />
+          <img src="/logo-full.png" alt="Digi Moi" style={{ width: paperWidth === '80mm' ? '60mm' : '44mm', height: 'auto', margin: '0 auto', display: 'block' }} />
         </div>
 
         {/* ── Business Header ── */}
@@ -185,7 +185,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
       {/* ── Footer ── */}
       <div style={s.footer}>
         <div>Thank you for your blessings!</div>
-        <div style={{ marginTop: '4px', fontWeight: 'bold' }}>Powered by Happy Pocket</div>
+        <div style={{ marginTop: '4px', fontWeight: 'bold' }}>Powered by Digi Moi</div>
       </div>
     </div>
   );

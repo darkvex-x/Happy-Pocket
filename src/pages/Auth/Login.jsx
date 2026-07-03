@@ -91,7 +91,7 @@ export default function Login() {
     addToast({
       type: "success",
       title: "Signed In",
-      message: "Welcome to Happy Pocket.",
+      message: "Welcome to Digi Moi.",
     });
     navigate("/");
   };

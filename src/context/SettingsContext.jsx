@@ -3,7 +3,7 @@ import { StorageService } from '../services/storage';
 
 export const SettingsContext = createContext({
   settings: {
-    businessName: "Happy Pocket",
+    businessName: "Digi Moi",
     receiptPrefix: "Moi-",
     currency: "₹",
     paperWidth: "58mm",
@@ -17,7 +17,7 @@ export const SettingsContext = createContext({
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    businessName: "Happy Pocket",
+    businessName: "Digi Moi",
     receiptPrefix: "Moi-",
     currency: "₹",
     paperWidth: "58mm",

@@ -474,7 +474,7 @@ export default function Database() {
         </div>
 
         {/* Data Grid */}
-        <CardContent className="p-0 flex-1 overflow-x-auto relative min-h-[500px]">
+        <CardContent className="p-0 flex-1 overflow-y-auto relative" style={{ maxHeight: 'calc(100vh - 290px)', minHeight: '300px' }}>
           {isLoading ? (
             <Table className="w-full border-collapse">
               <TableHeader className="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b">

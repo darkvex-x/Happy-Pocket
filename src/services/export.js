@@ -259,7 +259,7 @@ const toPDF = (entries, eventName, prefix, currency) => {
     doc.setFont('helvetica', 'normal');
     
     // Left footer branding
-    doc.text('Happy Pocket - Wedding Moi Management System', 15, doc.internal.pageSize.height - 10);
+    doc.text('Digi Moi - Wedding Moi Management System', 15, doc.internal.pageSize.height - 10);
     
     // Right footer page count
     const pageStr = `Page ${i} of ${pageCount}`;

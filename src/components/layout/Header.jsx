@@ -28,7 +28,7 @@ export default function Header() {
       case ROUTES.USER_MANAGEMENT:
         return ["Admin", "User Management"];
       default:
-        return ["Happy Pocket"];
+        return ["Digi Moi"];
     }
   };
 

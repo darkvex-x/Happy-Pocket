@@ -133,7 +133,7 @@ export default function Settings() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `happy_pocket_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `digi_moi_backup_${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -271,7 +271,7 @@ export default function Settings() {
               id="settingsBusinessName"
               value={form.businessName}
               onChange={(e) => handleChange("businessName", e.target.value)}
-              placeholder="Happy Pocket"
+              placeholder="Digi Moi"
               disabled={!canChangeSettings}
             />
             <p className="text-xs text-gray-400 mt-1">

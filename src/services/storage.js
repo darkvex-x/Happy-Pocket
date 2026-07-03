@@ -23,7 +23,7 @@ import { auth, db, isFirebaseConfigured } from "../firebase";
 
 const defaultDB = {
   settings: {
-    businessName: "Happy Pocket",
+    businessName: "Digi Moi",
     receiptPrefix: "Moi-",
     currency: "₹",
     paperWidth: "58mm",
@@ -34,7 +34,7 @@ const defaultDB = {
 };
 
 const SETTINGS_DOC_ID = "app";
-const DB_KEY = "happy_pocket_db";
+const DB_KEY = "digi_moi_db";
 
 const normalizeSettings = (data = {}) => ({
   ...defaultDB.settings,
@@ -1303,7 +1303,7 @@ export const StorageService = {
       const localDB = readLocalDB();
       const payload = {
         _meta: {
-          app: "happy_pocket",
+          app: "digi_moi",
           version: "1.0.0",
           exportedAt: new Date().toISOString(),
           eventCount: localDB.events.length,
@@ -1322,7 +1322,7 @@ export const StorageService = {
 
     const payload = {
       _meta: {
-        app: "happy_pocket",
+        app: "digi_moi",
         version: "1.0.0",
         exportedAt: new Date().toISOString(),
         eventCount: events.length,
