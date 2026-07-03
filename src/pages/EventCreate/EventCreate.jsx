@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
@@ -8,10 +8,14 @@ import { StorageService } from '../../services/storage';
 import { ROUTES } from '../../constants/routes';
 import { validateEvent } from '../../utils/validation';
 import { useToast } from '../../components/ui/Toast';
+import { usePermissions } from '../../context/PermissionContext';
+import { PERMISSIONS } from '../../services/permissions';
 
 export default function EventCreate() {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { permissions } = usePermissions();
+
   const [formData, setFormData] = useState({
     eventName: '',
     brideName: '',
@@ -23,6 +27,16 @@ export default function EventCreate() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState('');
+
+  const canCreate = permissions.includes(PERMISSIONS.EDIT_EVENT);
+
+  useEffect(() => {
+    if (!canCreate) {
+      navigate('/', { replace: true });
+    }
+  }, [canCreate, navigate]);
+
+  if (!canCreate) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;

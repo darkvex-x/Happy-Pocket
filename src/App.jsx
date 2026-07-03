@@ -1,7 +1,8 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db } from "./firebase";
 import { SettingsProvider } from "./context/SettingsContext";
 import { EventProvider } from "./context/EventContext";
 import { ToastProvider } from "./components/ui/Toast";
@@ -16,6 +17,9 @@ const Database = lazy(() => import("./pages/Database/Database"));
 const EventHistory = lazy(() => import("./pages/EventHistory/EventHistory"));
 const Settings = lazy(() => import("./pages/Settings/Settings"));
 const Login = lazy(() => import("./pages/Auth/Login"));
+const UserManagement = lazy(() => import("./pages/UserManagement/UserManagement"));
+
+const ACCESS_DENIED_KEY = "hp_access_denied";
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
@@ -31,7 +35,31 @@ function App() {
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
+      if (nextUser) {
+        // Validate returning / auto-logged-in user against the whitelist
+        try {
+          const q = query(
+            collection(db, "users"),
+            where("email", "==", (nextUser.email || "").toLowerCase()),
+          );
+          const snapshot = await getDocs(q);
+
+          if (snapshot.empty) {
+            // Not whitelisted — sign them out
+            sessionStorage.setItem(ACCESS_DENIED_KEY, "1");
+            await signOut(auth);
+            setUser(null);
+            setAuthReady(true);
+            return;
+          }
+        } catch (error) {
+          console.error("Whitelist check failed:", error);
+          // On network errors, allow session to continue to avoid
+          // locking out users in offline / flaky-network scenarios.
+        }
+      }
+
       setUser(nextUser);
       setAuthReady(true);
     });
@@ -83,6 +111,7 @@ function App() {
                     <Route path={ROUTES.DATABASE} element={<Database />} />
                     <Route path={ROUTES.HISTORY} element={<EventHistory />} />
                     <Route path={ROUTES.SETTINGS} element={<Settings />} />
+                    <Route path={ROUTES.USER_MANAGEMENT} element={<UserManagement />} />
                   </Route>
                   <Route
                     path="*"

@@ -15,6 +15,7 @@ export const PERMISSIONS = {
   ADD_ENTRY: "addEntry",
   EDIT_ENTRY: "editEntry",
   CHANGE_SETTINGS: "changeSettings",
+  MANAGE_USERS: "manageUsers",
 };
 
 export const ROLE_PERMISSIONS = {
@@ -30,6 +31,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.ADD_ENTRY,
     PERMISSIONS.EDIT_ENTRY,
     PERMISSIONS.CHANGE_SETTINGS,
+    PERMISSIONS.MANAGE_USERS,
   ],
   [ROLES.HELPER]: [
     PERMISSIONS.ADD_ENTRY,
@@ -56,3 +58,4 @@ export const getRolePermissions = (role = ROLES.ADMIN) => {
 export const canPerform = (role = ROLES.ADMIN, permission) => {
   return getRolePermissions(role).includes(permission);
 };
+

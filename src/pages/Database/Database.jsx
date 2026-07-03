@@ -3,6 +3,7 @@ import { StorageService } from "../../services/storage";
 import { ExportService } from "../../services/export";
 import { PAYMENT_METHODS } from "../../constants/paymentMethods";
 import { Card, CardContent } from "../../components/ui/Card";
+import Skeleton from "../../components/ui/Skeleton";
 import {
   Table,
   TableBody,
@@ -313,10 +314,6 @@ export default function Database() {
     };
   };
 
-  const canExportReports =
-    permissions.includes(PERMISSIONS.EXPORT_CSV) ||
-    permissions.includes(PERMISSIONS.EXPORT_EXCEL) ||
-    permissions.includes(PERMISSIONS.EXPORT_PDF);
 
   const handleExportCSV = () => {
     const { eventName, prefix, currency } = getExportContext();
@@ -479,9 +476,30 @@ export default function Database() {
         {/* Data Grid */}
         <CardContent className="p-0 flex-1 overflow-x-auto relative min-h-[500px]">
           {isLoading ? (
-            <div className="flex justify-center items-center h-64 text-gray-400">
-              Loading Grid...
-            </div>
+            <Table className="w-full border-collapse">
+              <TableHeader className="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b">
+                <TableRow>
+                  <TableHead>Receipt</TableHead>
+                  <TableHead>Guest Name</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Date Recorded</TableHead>
+                  <TableHead className="text-right pr-6">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="px-6 py-4"><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell className="px-6 py-4"><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell className="px-6 py-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                    <TableCell className="px-6 py-4"><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell className="px-6 py-4"><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell className="px-6 py-4 text-right pr-6"><Skeleton className="h-4 w-8 ml-auto" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : paginatedEntries.length === 0 ? (
             <EmptyState
               icon={Inbox}
@@ -521,7 +539,14 @@ export default function Database() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedEntries.map((entry, index) => (
+                {paginatedEntries.map((entry, index) => {
+                  const createdInfo = entry.createdByEmail
+                    ? `Added by ${entry.createdByEmail} on ${new Date(entry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}`
+                    : "";
+                  const updatedInfo = entry.updatedByEmail && entry.updatedAt
+                    ? ` · Edited by ${entry.updatedByEmail} on ${new Date(entry.updatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}`
+                    : "";
+                  return (
                   <TableRow
                     key={entry.id}
                     className={cn(
@@ -530,6 +555,7 @@ export default function Database() {
                         ? "bg-white dark:bg-[var(--card)]"
                         : "bg-gray-50/30 dark:bg-gray-800/10",
                     )}
+                    title={createdInfo + updatedInfo || undefined}
                   >
                     <TableCell className="px-6 font-mono text-xs text-gray-500">
                       {receiptPrefix}
@@ -585,7 +611,8 @@ export default function Database() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}
@@ -721,6 +748,30 @@ export default function Database() {
                 ))}
               </div>
             </div>
+            {editingEntry && (editingEntry.createdByEmail || editingEntry.updatedByEmail) && (
+              <div className="text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-3 mt-1 space-y-1">
+                {editingEntry.createdByEmail && (
+                  <p>
+                    <span className="font-semibold">Added by:</span>{" "}
+                    {editingEntry.createdByEmail}
+                    {editingEntry.createdAt && (
+                      <span className="ml-1">
+                        on {new Date(editingEntry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </p>
+                )}
+                {editingEntry.updatedByEmail && editingEntry.updatedAt && (
+                  <p>
+                    <span className="font-semibold">Last edited by:</span>{" "}
+                    {editingEntry.updatedByEmail}
+                    <span className="ml-1">
+                      on {new Date(editingEntry.updatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
             <div className="flex justify-end pt-4 space-x-3">
               <Button
                 type="button"

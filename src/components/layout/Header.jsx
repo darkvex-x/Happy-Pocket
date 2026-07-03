@@ -25,6 +25,8 @@ export default function Header() {
         return ["Events", "History"];
       case ROUTES.SETTINGS:
         return ["Application", "Settings"];
+      case ROUTES.USER_MANAGEMENT:
+        return ["Admin", "User Management"];
       default:
         return ["Happy Pocket"];
     }

@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { NAV_ITEMS } from "../../constants/navItems";
+import { usePermissions } from "../../context/PermissionContext";
+import { ROLES } from "../../services/permissions";
 
 export default function Sidebar() {
+  const { role } = usePermissions();
+
+  const visibleItems = useMemo(
+    () => NAV_ITEMS.filter((item) => !item.adminOnly || role === ROLES.ADMIN),
+    [role],
+  );
+
   return (
     <aside className="hidden md:flex flex-col border-r border-gray-200 dark:border-gray-800 bg-[var(--card)] h-screen sticky top-0 md:w-20 lg:w-64 transition-all duration-300 z-50">
       <div className="p-4 lg:p-6 h-16 flex items-center justify-center lg:justify-start border-b border-transparent">
@@ -20,7 +29,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 px-3 space-y-2 mt-6 overflow-y-auto no-scrollbar">
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
@@ -52,3 +61,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+

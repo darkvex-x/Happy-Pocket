@@ -133,9 +133,11 @@ export default function EventHistory() {
             Access, print, and manage all of your past operations here.
           </p>
         </div>
-        <Button onClick={() => navigate(ROUTES.CREATE_EVENT)}>
-          Create New Event
-        </Button>
+        {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
+          <Button onClick={() => navigate(ROUTES.CREATE_EVENT)}>
+            Create New Event
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -243,17 +245,19 @@ export default function EventHistory() {
                     <Printer size={16} />
                   </Button>
                 )}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full text-xs"
-                  title="Duplicate Event"
-                  aria-label={`Duplicate event ledger for ${event.eventName}`}
-                  disabled={isDuplicating}
-                  onClick={() => handleDuplicate(event)}
-                >
-                  <Copy size={16} />
-                </Button>
+                {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full text-xs"
+                    title="Duplicate Event"
+                    aria-label={`Duplicate event ledger for ${event.eventName}`}
+                    disabled={isDuplicating}
+                    onClick={() => handleDuplicate(event)}
+                  >
+                    <Copy size={16} />
+                  </Button>
+                )}
                 {permissions.includes(PERMISSIONS.DELETE_EVENT) && (
                   <Button
                     variant="ghost"

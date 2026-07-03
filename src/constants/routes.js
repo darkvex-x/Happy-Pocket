@@ -6,4 +6,5 @@ export const ROUTES = {
   DATABASE: "/database",
   HISTORY: "/history",
   SETTINGS: "/settings",
+  USER_MANAGEMENT: "/users",
 };

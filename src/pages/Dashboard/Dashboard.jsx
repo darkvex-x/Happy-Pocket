@@ -28,9 +28,12 @@ import Skeleton from "../../components/ui/Skeleton";
 import { ROUTES } from "../../constants/routes";
 import { StorageService } from "../../services/storage";
 import { useTotals } from "../../hooks/useTotals";
+import { usePermissions } from "../../context/PermissionContext";
+import { PERMISSIONS } from "../../services/permissions";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { permissions } = usePermissions();
   const [events, setEvents] = useState([]);
   const [entries, setEntries] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
@@ -120,14 +123,16 @@ export default function Dashboard() {
             Welcome back to Happy Pocket. Here is your summary.
           </p>
         </div>
-        <Button
-          size="lg"
-          className="w-full sm:w-auto shadow-md"
-          onClick={() => navigate(ROUTES.CREATE_EVENT)}
-        >
-          <Plus className="mr-2" size={20} />
-          Create New Event
-        </Button>
+        {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
+          <Button
+            size="lg"
+            className="w-full sm:w-auto shadow-md"
+            onClick={() => navigate(ROUTES.CREATE_EVENT)}
+          >
+            <Plus className="mr-2" size={20} />
+            Create New Event
+          </Button>
+        )}
       </div>
 
       {/* Stats Grid */}
@@ -196,16 +201,18 @@ export default function Dashboard() {
           ) : recentEvents.length === 0 ? (
             <div className="p-12 text-center text-gray-500">
               <p className="text-sm">
-                No events found. Start by creating a new event!
+                No events found.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4"
-                onClick={() => navigate(ROUTES.CREATE_EVENT)}
-              >
-                Create Event
-              </Button>
+              {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => navigate(ROUTES.CREATE_EVENT)}
+                >
+                  Create Event
+                </Button>
+              )}
             </div>
           ) : (
             <Table>

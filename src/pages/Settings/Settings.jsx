@@ -5,6 +5,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import { StorageService } from "../../services/storage";
 import { SettingsContext } from "../../context/SettingsContext";
 import {
@@ -34,10 +35,18 @@ import { usePermissions } from "../../context/PermissionContext";
 import { PERMISSIONS } from "../../services/permissions";
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { theme, toggleTheme, updateSettings } = useContext(SettingsContext);
   const { addToast } = useToast();
   const { permissions } = usePermissions();
   const canChangeSettings = permissions.includes(PERMISSIONS.CHANGE_SETTINGS);
+
+  useEffect(() => {
+    if (!canChangeSettings) {
+      navigate("/", { replace: true });
+    }
+  }, [canChangeSettings, navigate]);
+
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -222,6 +231,8 @@ export default function Settings() {
       ))}
     </div>
   );
+
+  if (!canChangeSettings) return null;
 
   if (isLoading) {
     return (

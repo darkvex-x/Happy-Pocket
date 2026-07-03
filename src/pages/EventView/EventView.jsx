@@ -37,6 +37,9 @@ import {
   ChevronUp,
   ChevronDown,
   Inbox,
+  UserPlus,
+  UserMinus,
+  Copy,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useReceiptNumber } from "../../hooks/useReceiptNumber";
@@ -91,6 +94,9 @@ export default function EventView() {
   const [eventEditForm, setEventEditForm] = useState(null);
   const [eventEditErrors, setEventEditErrors] = useState({});
   const [isEventSaving, setIsEventSaving] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareEmailInput, setShareEmailInput] = useState("");
+  const [isSharingSubmitting, setIsSharingSubmitting] = useState(false);
 
   // Custom Hook: Print targeting
   const {
@@ -233,7 +239,11 @@ export default function EventView() {
     return isValid;
   };
 
-  const handleShareEvent = async () => {
+  const handleShareEvent = () => {
+    setIsShareModalOpen(true);
+  };
+
+  const handleCopyLink = async () => {
     if (!activeEvent) return;
 
     try {
@@ -269,6 +279,56 @@ export default function EventView() {
         type: "error",
         title: "Unable to Share",
         message: error.message || "Could not copy the event link.",
+      });
+    }
+  };
+
+  const handleAddHelper = async (e) => {
+    e.preventDefault();
+    if (!shareEmailInput.trim()) return;
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shareEmailInput.trim())) {
+      addToast({
+        type: "error",
+        title: "Invalid Email",
+        message: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    setIsSharingSubmitting(true);
+    try {
+      await StorageService.shareEventWithEmail(activeEvent.id, shareEmailInput);
+      addToast({
+        type: "success",
+        title: "Helper Added",
+        message: `${shareEmailInput.trim()} can now access this event.`,
+      });
+      setShareEmailInput("");
+    } catch (error) {
+      addToast({
+        type: "error",
+        title: "Unable to Add",
+        message: error.message || "Something went wrong.",
+      });
+    } finally {
+      setIsSharingSubmitting(false);
+    }
+  };
+
+  const handleRemoveHelper = async (email) => {
+    try {
+      await StorageService.unshareEventWithEmail(activeEvent.id, email);
+      addToast({
+        type: "success",
+        title: "Helper Removed",
+        message: `${email} access has been revoked.`,
+      });
+    } catch (error) {
+      addToast({
+        type: "error",
+        title: "Unable to Remove",
+        message: error.message || "Something went wrong.",
       });
     }
   };
@@ -778,8 +838,19 @@ export default function EventView() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAndSortedEntries.map((entry) => (
-                      <TableRow key={entry.id} className="group">
+                    {filteredAndSortedEntries.map((entry) => {
+                      const createdInfo = entry.createdByEmail
+                        ? `Added by ${entry.createdByEmail} on ${new Date(entry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}`
+                        : "";
+                      const updatedInfo = entry.updatedByEmail && entry.updatedAt
+                        ? ` · Edited by ${entry.updatedByEmail} on ${new Date(entry.updatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}`
+                        : "";
+                      return (
+                      <TableRow
+                        key={entry.id}
+                        className="group"
+                        title={createdInfo + updatedInfo || undefined}
+                      >
                         <TableCell className="font-mono text-gray-500 text-xs py-3">
                           {receiptPrefix}
                           {entry.receiptNumber}
@@ -845,7 +916,8 @@ export default function EventView() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
@@ -923,6 +995,30 @@ export default function EventView() {
                 ))}
               </div>
             </div>
+            {editingEntry && (editingEntry.createdByEmail || editingEntry.updatedByEmail) && (
+              <div className="text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-3 mt-1 space-y-1">
+                {editingEntry.createdByEmail && (
+                  <p>
+                    <span className="font-semibold">Added by:</span>{" "}
+                    {editingEntry.createdByEmail}
+                    {editingEntry.createdAt && (
+                      <span className="ml-1">
+                        on {new Date(editingEntry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </p>
+                )}
+                {editingEntry.updatedByEmail && editingEntry.updatedAt && (
+                  <p>
+                    <span className="font-semibold">Last edited by:</span>{" "}
+                    {editingEntry.updatedByEmail}
+                    <span className="ml-1">
+                      on {new Date(editingEntry.updatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
             <div className="flex justify-end pt-4 space-x-3">
               <Button
                 type="button"
@@ -1135,6 +1231,94 @@ export default function EventView() {
         entry={printEntry}
         event={activeEvent}
       />
+
+      {/* MANAGE ACCESS MODAL */}
+      <Modal
+        isOpen={isShareModalOpen}
+        onClose={() => {
+          setIsShareModalOpen(false);
+          setShareEmailInput("");
+        }}
+        title="Manage Event Access"
+      >
+        <div className="space-y-6">
+          {/* Share Link Row */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Share Link
+            </h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/#${ROUTES.EVENT_BY_SHARE.replace(
+                  ":shareId",
+                  activeEvent?.shareId || "",
+                )}`}
+                className="flex-1 h-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 select-all focus:outline-none"
+              />
+              <Button variant="outline" size="sm" onClick={handleCopyLink} title="Copy share link">
+                <Copy size={16} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-gray-200 dark:bg-gray-800" />
+
+          {/* Add Helper Form */}
+          <form onSubmit={handleAddHelper} className="space-y-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Add Helper
+            </h3>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                required
+                value={shareEmailInput}
+                onChange={(e) => setShareEmailInput(e.target.value)}
+                placeholder="helper@example.com"
+                disabled={isSharingSubmitting}
+                className="flex-1"
+              />
+              <Button type="submit" variant="primary" isLoading={isSharingSubmitting}>
+                <UserPlus size={16} className="mr-1.5" /> Add
+              </Button>
+            </div>
+          </form>
+
+          {/* Shared Helpers List */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Shared Helpers
+            </h3>
+            {(!activeEvent?.sharedEmails || activeEvent.sharedEmails.length === 0) ? (
+              <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+                This event has not been shared with any helpers yet.
+              </p>
+            ) : (
+              <ul className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden bg-gray-50/50 dark:bg-gray-900/10">
+                {activeEvent.sharedEmails.map((email) => (
+                  <li
+                    key={email}
+                    className="flex justify-between items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <span className="truncate">{email}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveHelper(email)}
+                      className="text-red-500 hover:text-red-600 p-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                      title="Revoke access"
+                    >
+                      <UserMinus size={15} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

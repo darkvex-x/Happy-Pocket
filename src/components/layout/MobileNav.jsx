@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from '../../constants/navItems';
+import { usePermissions } from '../../context/PermissionContext';
+import { ROLES } from '../../services/permissions';
 
 export default function MobileNav() {
+  const { role } = usePermissions();
+
+  const visibleItems = useMemo(
+    () => NAV_ITEMS.filter((item) => !item.adminOnly || role === ROLES.ADMIN),
+    [role],
+  );
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--card)] border-t border-gray-200 dark:border-gray-800 flex items-center justify-around z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-      {NAV_ITEMS.map((item) => {
+      {visibleItems.map((item) => {
         const Icon = item.icon;
         return (
           <NavLink
@@ -25,3 +34,4 @@ export default function MobileNav() {
     </nav>
   );
 }
+
