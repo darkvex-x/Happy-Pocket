@@ -1,0 +1,138 @@
+rules_version = '2';
+
+// ────────────────────────────────────────────────────────────────────────────
+// FULL RBAC SECURITY RULES (for UID-based user document IDs)
+// ────────────────────────────────────────────────────────────────────────────
+//
+// To use these rules:
+// 1. Change createUser() to use auth.currentUser.uid as document ID
+// 2. Add uid field to all existing user documents
+// 3. Update PermissionContext to query by UID instead of email
+// 4. Migrate email-based lookups in shareEventWithEmail to store UIDs
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // HELPER FUNCTIONS
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isWhitelisted() {
+      return isAuthenticated() 
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && userDoc().active != false;
+    }
+    
+    function userRole() {
+      return isWhitelisted() ? (userDoc().role == 'admin' ? 'admin' : 'helper') : null;
+    }
+    
+    function isAdmin() {
+      return userRole() == 'admin';
+    }
+    
+    function isHelper() {
+      return userRole() == 'helper';
+    }
+    
+    function isAnyWhitelistedUser() {
+      return isAdmin() || isHelper();
+    }
+    
+    function isValidEvent(data) {
+      return data.keys().hasAll(['id', 'eventName', 'ownerId', 'ownerEmail', 'functionDate', 'totalAmount', 'totalEntries', 'createdAt'])
+        && data.id is string
+        && data.eventName is string && data.eventName.size() > 0
+        && data.ownerId is string
+        && data.ownerEmail is string
+        && data.functionDate is string
+        && data.totalAmount is number && data.totalAmount >= 0
+        && data.totalEntries is number && data.totalEntries >= 0
+        && data.createdAt is string;
+    }
+    
+    function isValidEntry(data) {
+      return data.keys().hasAll(['id', 'eventId', 'receiptNumber', 'name', 'amount', 'paymentMethod', 'date', 'createdAt'])
+        && data.id is string
+        && data.eventId is string && data.eventId.size() > 0
+        && data.receiptNumber is string
+        && data.name is string && data.name.size() > 0
+        && data.amount is number && data.amount > 0
+        && data.paymentMethod is string
+        && data.date is string
+        && data.createdAt is string;
+    }
+    
+    function isEventOwner(eventData) {
+      return isWhitelisted() && request.auth.uid == eventData.ownerId;
+    }
+    
+    function isEventSharedWithEmail(eventData) {
+      return isWhitelisted() && (userDoc().email in (eventData.sharedEmails || []));
+    }
+    
+    function isEventSharedWithUid(eventData) {
+      return isWhitelisted() && (request.auth.uid in (eventData.sharedUsers || []));
+    }
+    
+    function hasEventAccess(eventData) {
+      return isEventOwner(eventData) || isEventSharedWithEmail(eventData) || isEventSharedWithUid(eventData);
+    }
+    
+    function isEntryCreator(entryData) {
+      return isWhitelisted() && entryData.createdByEmail == userDoc().email;
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // USERS COLLECTION
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // SETTINGS DOCUMENT
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /settings/app {
+      allow read: if isWhitelisted();
+      allow write: if isAdmin();
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // EVENTS COLLECTION
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /events/{eventId} {
+      allow get: if isWhitelisted() && hasEventAccess(resource.data);
+      allow list: if false;
+      allow create: if isAdmin() && isValidEvent(request.resource.data);
+      allow update: if isAdmin() && isValidEvent(request.resource.data);
+      allow delete: if isAdmin() && isEventOwner(resource.data);
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // ENTRIES COLLECTION
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /entries/{entryId} {
+      allow get: if isWhitelisted() && hasEventAccess(get(/databases/$(database)/documents/events/$(resource.data.eventId)).data);
+      allow list: if false;
+      allow create: if isAnyWhitelistedUser() && isValidEntry(request.resource.data);
+      allow update: if (isAdmin() || (isHelper() && isEntryCreator(resource.data))) && isValidEntry(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

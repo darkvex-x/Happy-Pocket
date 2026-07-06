@@ -1611,7 +1611,9 @@ export const StorageService = {
     }
 
     const userId = `user_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+    const firebaseUser = auth.currentUser;
     const newUser = {
+      uid: firebaseUser?.uid || "",
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
       role: data.role || "helper",

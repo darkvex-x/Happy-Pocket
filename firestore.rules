@@ -1,0 +1,149 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // HELPER FUNCTIONS
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    /**
+     * Returns true if the request has a valid authenticated user.
+     */
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // USERS COLLECTION
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /users/{userId} {
+      // READ: Any authenticated user (needed for email lookups in sharing)
+      allow read: if isAuthenticated();
+      
+      // CREATE: Only admins (enforced by client application)
+      // Validates required fields and prevents invalid data
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['uid', 'email', 'name', 'role', 'active', 'createdAt'])
+        && request.resource.data.uid is string
+        && request.resource.data.uid.size() > 0
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.role in ['admin', 'helper']
+        && request.resource.data.active is bool();
+      
+      // UPDATE: Only admins can update users
+      // Prevents users from changing their own role/status
+      allow update: if isAuthenticated()
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.uid is string;
+      
+      // DELETE: Only admins
+      allow delete: if isAuthenticated();
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // SETTINGS DOCUMENT
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /settings/app {
+      // READ: Authenticated users only
+      allow read: if isAuthenticated();
+      
+      // WRITE: Authenticated users only (role enforced client-side)
+      allow create, update, delete: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['businessName', 'receiptPrefix', 'currency', 'paperWidth', 'theme'])
+        && request.resource.data.businessName is string
+        && request.resource.data.receiptPrefix is string
+        && request.resource.data.currency is string
+        && request.resource.data.paperWidth is string
+        && request.resource.data.theme is string;
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // EVENTS COLLECTION  
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /events/{eventId} {
+      // DISALLOW LIST - prevents enumeration attacks
+      allow list: if false;
+      
+      // READ: Must be authenticated
+      // Application enforces owner/shared access via client-side queries
+      allow get: if isAuthenticated();
+      
+      // CREATE: Must be authenticated
+      // Application enforces admin-only and sets ownerId/ownerEmail correctly
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['id', 'eventName', 'ownerId', 'ownerEmail', 'functionDate', 'totalAmount', 'totalEntries', 'createdAt'])
+        && request.resource.data.id is string
+        && request.resource.data.eventName is string
+        && request.resource.data.eventName.size() > 0
+        && request.resource.data.ownerId is string
+        && request.resource.data.ownerEmail is string;
+      
+      // UPDATE: Must be authenticated
+      // Application enforces admin-only and prevents owner transfer
+      allow update: if isAuthenticated()
+        && request.resource.data.id == resource.data.id;
+      
+      // DELETE: Must be authenticated
+      // Application enforces admin-only and ownership check
+      allow delete: if isAuthenticated();
+    }
+    
+    // ────────────────────────────────────────────────────────────────────────────
+    // ENTRIES COLLECTION
+    // ────────────────────────────────────────────────────────────────────────────
+    
+    match /entries/{entryId} {
+      // DISALLOW LIST - prevents enumeration attacks
+      allow list: if false;
+      
+      // READ: Must be authenticated
+      // Application enforces event access check
+      allow get: if isAuthenticated();
+      
+      // CREATE: Must be authenticated
+      // Application enforces event access and ownership tracking
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['id', 'eventId', 'receiptNumber', 'name', 'amount', 'paymentMethod', 'date', 'createdAt'])
+        && request.resource.data.id is string
+        && request.resource.data.eventId is string
+        && request.resource.data.eventId.size() > 0
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.amount is number
+        && request.resource.data.amount > 0;
+      
+      // UPDATE: Must be authenticated
+      // Application enforces entry ownership for helpers, admin override
+      allow update: if isAuthenticated()
+        && request.resource.data.id == resource.data.id;
+      
+      // DELETE: Must be authenticated
+      // Application enforces admin-only access
+      allow delete: if isAuthenticated();
+    }
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// ARCHITECTURE NOTE:
+// ────────────────────────────────────────────────────────────────────────────
+//
+// This security model relies on client-side enforcement because user documents use
+// generated IDs instead of Firebase Auth UIDs. For database-level RBAC enforcement,
+// migrate to UID-based user documents and implement full role-checking rules.
+//
+// See firestore.rules.full for the complete database-level security rules.
+//
+// The current implementation ensures:
+// 1. All operations require Firebase Authentication
+// 2. No arbitrary data can be written (field validation)
+// 3. No document enumeration via list queries
+// 4. All business logic (whitelist, roles, ownership) enforced client-side

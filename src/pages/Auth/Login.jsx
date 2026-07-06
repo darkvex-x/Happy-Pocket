@@ -23,6 +23,7 @@ const ACCESS_DENIED_KEY = "hp_access_denied";
 /**
  * Checks if the given email exists in the Firestore "users" collection.
  * Returns the matching user document data if found, or null otherwise.
+ * Throws on any error to enforce security (never bypass).
  */
 async function findWhitelistedUser(email) {
   if (!email) return null;
@@ -56,11 +57,13 @@ export default function Login() {
     }
   }, [addToast]);
 
-  /**
-   * After Firebase Auth succeeds, verify the user's email against the
-   * Firestore "users" whitelist. If not found → sign out + toast.
-   * If found → merge auth metadata into the user doc and navigate home.
-   */
+/**
+    * After Firebase Auth succeeds, verify the user's email against the
+    * Firestore "users" whitelist. If not found → sign out + toast.
+    * If disabled → sign out + toast.
+    * If found → merge auth metadata into the user doc and navigate home.
+    * Network failures will throw and be caught below - security never bypassed.
+    */
   const verifyAndProceed = async (firebaseUser) => {
     const whitelisted = await findWhitelistedUser(firebaseUser.email);
 
@@ -70,6 +73,17 @@ export default function Login() {
         type: "error",
         title: "Access Denied",
         message: "Please contact the administrator.",
+      });
+      return;
+    }
+
+    // Disabled users cannot access the application
+    if (whitelisted.active === false) {
+      await signOut(auth);
+      addToast({
+        type: "error",
+        title: "Account Disabled",
+        message: "Your account has been disabled. Please contact the administrator.",
       });
       return;
     }

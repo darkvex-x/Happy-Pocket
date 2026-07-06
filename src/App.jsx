@@ -9,6 +9,7 @@ import { ToastProvider } from "./components/ui/Toast";
 import MainLayout from "./components/layout/MainLayout";
 import { ROUTES } from "./constants/routes";
 import { PermissionProvider } from "./context/PermissionContext";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 // Lazy loaded page components
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const EventCreate = lazy(() => import("./pages/EventCreate/EventCreate"));
@@ -30,7 +31,7 @@ const PageLoader = () => (
   </div>
 );
 
-function App() {
+export default function App() {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
 
@@ -38,6 +39,8 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
       if (nextUser) {
         // Validate returning / auto-logged-in user against the whitelist
+        // Network failures MUST NOT bypass security - users without valid
+        // whitelist status are signed out immediately.
         try {
           const q = query(
             collection(db, "users"),
@@ -46,7 +49,17 @@ function App() {
           const snapshot = await getDocs(q);
 
           if (snapshot.empty) {
-            // Not whitelisted — sign them out
+            // Not whitelisted — sign them out immediately
+            sessionStorage.setItem(ACCESS_DENIED_KEY, "1");
+            await signOut(auth);
+            setUser(null);
+            setAuthReady(true);
+            return;
+          }
+
+          const userData = snapshot.docs[0].data();
+          // Disabled users cannot continue
+          if (userData.active === false) {
             sessionStorage.setItem(ACCESS_DENIED_KEY, "1");
             await signOut(auth);
             setUser(null);
@@ -54,14 +67,22 @@ function App() {
             return;
           }
         } catch (error) {
-          console.error("Whitelist check failed:", error);
-          // On network errors, allow session to continue to avoid
-          // locking out users in offline / flaky-network scenarios.
+          console.error("Whitelist validation failed:", error);
+          // On any error (including network failures), deny access
+          // This ensures security is never bypassed
+          sessionStorage.setItem(ACCESS_DENIED_KEY, "1");
+          await signOut(auth);
+          setUser(null);
+          setAuthReady(true);
+          return;
         }
-      }
 
-      setUser(nextUser);
-      setAuthReady(true);
+        setUser(nextUser);
+        setAuthReady(true);
+      } else {
+        setUser(null);
+        setAuthReady(true);
+      }
     });
 
     return () => unsubscribe();
@@ -79,52 +100,52 @@ function App() {
   };
 
   return (
-    <SettingsProvider>
-      <ToastProvider>
-        <EventProvider>
-          <PermissionProvider>
-            <HashRouter>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route index element={<Dashboard />} />
+    <ErrorBoundary>
+      <SettingsProvider>
+        <ToastProvider>
+          <EventProvider>
+            <PermissionProvider>
+              <HashRouter>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
                     <Route
-                      path={ROUTES.CREATE_EVENT}
-                      element={<EventCreate />}
-                    />
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <MainLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route index element={<Dashboard />} />
+                      <Route
+                        path={ROUTES.CREATE_EVENT}
+                        element={<EventCreate />}
+                      />
+                      <Route
+                        path={ROUTES.CURRENT_EVENT}
+                        element={<EventView />}
+                      />
+                      <Route
+                        path={ROUTES.EVENT_BY_SHARE}
+                        element={<EventView />}
+                      />
+                      <Route path={ROUTES.DATABASE} element={<Database />} />
+                      <Route path={ROUTES.HISTORY} element={<EventHistory />} />
+                      <Route path={ROUTES.SETTINGS} element={<Settings />} />
+                      <Route path={ROUTES.USER_MANAGEMENT} element={<UserManagement />} />
+                    </Route>
                     <Route
-                      path={ROUTES.CURRENT_EVENT}
-                      element={<EventView />}
+                      path="*"
+                      element={<Navigate to={user ? "/" : "/login"} replace />}
                     />
-                    <Route
-                      path={ROUTES.EVENT_BY_SHARE}
-                      element={<EventView />}
-                    />
-                    <Route path={ROUTES.DATABASE} element={<Database />} />
-                    <Route path={ROUTES.HISTORY} element={<EventHistory />} />
-                    <Route path={ROUTES.SETTINGS} element={<Settings />} />
-                    <Route path={ROUTES.USER_MANAGEMENT} element={<UserManagement />} />
-                  </Route>
-                  <Route
-                    path="*"
-                    element={<Navigate to={user ? "/" : "/login"} replace />}
-                  />
-                </Routes>
-              </Suspense>
-            </HashRouter>
-          </PermissionProvider>
-        </EventProvider>
-      </ToastProvider>
-    </SettingsProvider>
+                  </Routes>
+                </Suspense>
+              </HashRouter>
+            </PermissionProvider>
+          </EventProvider>
+        </ToastProvider>
+      </SettingsProvider>
+    </ErrorBoundary>
   );
 }
-
-export default App;
