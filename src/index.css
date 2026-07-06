@@ -2,45 +2,55 @@
 
 @theme {
   --color-primary-50: rgba(37, 99, 235, 0.1);
+  --color-primary-100: rgba(37, 99, 235, 0.2);
+  --color-primary-200: rgba(37, 99, 235, 0.3);
   --color-primary-500: #2563EB;
   --color-primary-600: #1D4ED8;
-  --color-primary-900: rgba(37, 99, 235, 0.2);
+  --color-primary-700: #1A365D;
 }
 
 :root {
-  --background: #0B1220;
-  --foreground: #F8FAFC;
-  --card: #1E293B;
-  --card-surface: #111827;
-  --input: #111827;
-  --border: #1F2937;
-  --border-muted: #334155;
+  --background: #0A0A0A;
+  --background-secondary: #111111;
+  --foreground: #FAFAFA;
+  --card: #161616;
+  --card-secondary: #1E1E1E;
+  --input: #1E1E1E;
+  --border: #2A2A2A;
+  --border-hover: #3A3A3A;
   --primary: #2563EB;
+  --primary-hover: #1D4ED8;
   --success: #10B981;
   --warning: #F59E0B;
   --danger: #EF4444;
-  --muted: #64748B;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #6B7280;
+  --muted: #737373;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A3A3A3;
+  --text-tertiary: #737373;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 .dark {
-  --background: #0B1220;
-  --foreground: #F8FAFC;
-  --card: #1E293B;
-  --card-surface: #111827;
-  --input: #111827;
-  --border: #1F2937;
-  --border-muted: #334155;
+  --background: #0A0A0A;
+  --background-secondary: #111111;
+  --foreground: #FAFAFA;
+  --card: #161616;
+  --card-secondary: #1E1E1E;
+  --input: #1E1E1E;
+  --border: #2A2A2A;
+  --border-hover: #3A3A3A;
   --primary: #2563EB;
+  --primary-hover: #1D4ED8;
   --success: #10B981;
   --warning: #F59E0B;
   --danger: #EF4444;
-  --muted: #64748B;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #6B7280;
+  --muted: #737373;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A3A3A3;
+  --text-tertiary: #737373;
 }
 
 html, body, #root {
@@ -58,18 +68,18 @@ body {
 
 /* Thin custom scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B1220;
+  background: #0A0A0A;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F2937;
-  border-radius: 4px;
+  background: #2A2A2A;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #3A3A3A;
 }
 
 /* Hide scrollbar for sidebar */
@@ -86,7 +96,7 @@ body {
   width: 3px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #1F2937;
+  background: #2A2A2A;
 }
 
 /* Active nav glow (subtle, not distracting) */

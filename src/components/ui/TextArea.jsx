@@ -6,15 +6,15 @@ const TextArea = forwardRef(({ className, error, ...props }, ref) => {
     <div className="w-full flex flex-col space-y-1.5">
       <textarea
         className={cn(
-          "flex min-h-[80px] w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-transparent transition-shadow disabled:cursor-not-allowed disabled:opacity-50 resize-y",
-          error && "border-red-500 focus:ring-red-500",
+          "flex min-h-[80px] w-full rounded-lg border border-[#2A2A2A] bg-[#161616] px-3 py-2 text-sm text-white placeholder:text-[#525252] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-[#2563EB] transition-all disabled:cursor-not-allowed disabled:opacity-50 resize-y",
+          error && "border-[#EF4444]/60 focus:ring-[#EF4444]/20 focus:border-[#EF4444]",
           className
         )}
         ref={ref}
         {...props}
       />
       {error && (
-        <p className="text-sm text-red-500 font-medium">
+        <p className="text-sm text-[#EF4444] font-medium">
           {error}
         </p>
       )}

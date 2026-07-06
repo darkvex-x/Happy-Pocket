@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { StorageService } from "../../services/storage";
 import { ExportService } from "../../services/export";
 import { PAYMENT_METHODS } from "../../constants/paymentMethods";
-import { Card, CardContent } from "../../components/ui/Card";
 import Skeleton from "../../components/ui/Skeleton";
 import {
   Table,
@@ -367,16 +366,16 @@ export default function Database() {
   const SortableHead = ({ label, sortKey, className }) => (
     <TableHead
       className={cn(
-        "cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group px-6",
+        "cursor-pointer select-none hover:bg-[#161616] dark:hover:bg-[#2A2A2A] transition-colors group px-6",
         className,
       )}
       onClick={() => handleSort(sortKey)}
     >
       <div className="flex items-center space-x-1">
-        <span className="font-semibold text-gray-700 dark:text-gray-300">
+        <span className="font-semibold text-[#737373] dark:text-[#A3A3A3]">
           {label}
         </span>
-        <span className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+        <span className="text-[#737373] group-hover:text-[#A3A3A3] dark:group-hover:text-[#A3A3A3]">
           {sortConfig.key === sortKey ? (
             sortConfig.direction === "asc" ? (
               <ChevronUp size={14} />
@@ -398,11 +397,8 @@ export default function Database() {
     <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col">
       <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Database Viewer</h1>
-          <p
-            style={{ fontFamily: '"Lemon",Aerial' }}
-            className="text-gray-500 dark:text-gray-400 mt-1"
-          >
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Database Viewer</h1>
+          <p className="text-[#737373] mt-1 text-sm">
             Deep dive, filter, and export all recorded transactions.
           </p>
         </div>
@@ -415,7 +411,7 @@ export default function Database() {
               onClick={handleExportCSV}
               disabled={filteredAndSortedEntries.length === 0}
             >
-              <FileDown size={16} className="mr-1.5 text-emerald-600" /> CSV
+              <FileDown size={16} className="mr-1.5 text-[#10B981]" /> CSV
             </Button>
           )}
           {permissions.includes(PERMISSIONS.EXPORT_EXCEL) && (
@@ -425,7 +421,7 @@ export default function Database() {
               onClick={handleExportExcel}
               disabled={filteredAndSortedEntries.length === 0}
             >
-              <FileSpreadsheet size={16} className="mr-1.5 text-green-600" />
+              <FileSpreadsheet size={16} className="mr-1.5 text-[#10B981]" />
               Excel
             </Button>
           )}
@@ -436,15 +432,15 @@ export default function Database() {
               onClick={handleExportPDF}
               disabled={filteredAndSortedEntries.length === 0}
             >
-              <FileText size={16} className="mr-1.5 text-red-500" /> PDF
+              <FileText size={16} className="mr-1.5 text-[#EF4444]" /> PDF
             </Button>
           )}
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col border border-slate-800 bg-[#1E293B] shadow-md rounded-2xl overflow-hidden">
+      <div className="flex-1 flex flex-col border border-[#2A2A2A] bg-[#161616] shadow-md rounded-xl overflow-hidden">
         {/* Top Controls Bar */}
-        <div className="p-4 md:p-5 border-b border-slate-800/60 bg-slate-900/40 flex flex-col xl:flex-row gap-4 justify-between xl:items-center">
+        <div className="p-4 md:p-5 border-b border-[#2A2A2A]/60 bg-[#111111]/40 flex flex-col xl:flex-row gap-4 justify-between xl:items-center">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full xl:w-auto">
             <div className="w-full md:w-64">
               <Dropdown
@@ -454,12 +450,12 @@ export default function Database() {
                   value: e.id,
                   label: e.eventName,
                 }))}
-                className="bg-[#111827] border-slate-850"
+                className="bg-[#111111] border-[#2A2A2A]"
                 disabled={isLoading || events.length === 0}
               />
             </div>
 
-            <div className="text-xs font-semibold text-slate-400 bg-slate-950/60 px-3 py-2 rounded-lg border border-slate-800">
+            <div className="text-xs font-semibold text-[#737373] bg-[#0A0A0A]/60 px-3 py-2 rounded-lg border border-[#2A2A2A]">
               Showing {filteredTotals.count} entries • Total: ₹
               {filteredTotals.amount.toLocaleString("en-IN")}
             </div>
@@ -470,7 +466,7 @@ export default function Database() {
               placeholder="Search name, receipt..."
               value={displayQuery}
               onChange={handleSearchChange}
-              className="w-full sm:w-64 bg-[#111827] border-slate-850 text-slate-200 placeholder:text-slate-550"
+               className="w-full sm:w-64 bg-[#111111] border-[#2A2A2A] text-slate-200 placeholder:text-[#737373]"
             />
             <Dropdown
               value={paymentFilter}
@@ -482,16 +478,16 @@ export default function Database() {
                 { value: "All", label: "All Methods" },
                 ...PAYMENT_METHODS,
               ]}
-              className="w-full sm:w-48 bg-[#111827] border-slate-850"
+               className="w-full sm:w-48 bg-[#111111] border-[#2A2A2A]"
             />
           </div>
         </div>
 
         {/* Data Grid */}
-        <CardContent className="p-0 flex-1 overflow-y-auto relative" style={{ maxHeight: 'calc(100vh - 290px)', minHeight: '300px' }}>
+        <div className="p-0 flex-1 overflow-y-auto relative" style={{ maxHeight: 'calc(100vh - 290px)', minHeight: '300px' }}>
           {isLoading ? (
             <Table className="w-full border-collapse">
-              <TableHeader className="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b">
+              <TableHeader className="bg-[#0A0A0A]/80 dark:bg-[#2A2A2A]/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b border-[#2A2A2A]">
                 <TableRow>
                   <TableHead>Receipt</TableHead>
                   <TableHead>Guest Name</TableHead>
@@ -538,7 +534,7 @@ export default function Database() {
             />
           ) : (
             <Table className="w-full border-collapse">
-              <TableHeader className="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b">
+              <TableHeader className="bg-[#0A0A0A]/80 dark:bg-[#2A2A2A]/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b border-[#2A2A2A]">
                 <TableRow>
                   <SortableHead label="Receipt" sortKey="receiptNumber" />
                   <SortableHead label="Guest Name" sortKey="name" />
@@ -564,10 +560,10 @@ export default function Database() {
                   <TableRow
                     key={entry.id}
                     className={cn(
-                      "hover:bg-slate-800/40 transition-colors border-b border-slate-800/40",
+                      "hover:bg-[#2A2A2A]/40 transition-colors border-b border-[#2A2A2A]/40",
                       index % 2 === 0
-                        ? "bg-slate-900/10"
-                        : "bg-[#1E293B]/20",
+                        ? "bg-[#111111]/10"
+                        : "bg-[#161616]/20",
                     )}
                     title={createdInfo + updatedInfo || undefined}
                   >
@@ -582,11 +578,11 @@ export default function Database() {
                       {entry.amount.toLocaleString("en-IN")}
                     </TableCell>
                     <TableCell className="px-6">
-                      <span className="text-[10px] font-bold bg-slate-800 text-[#94A3B8] px-2 py-0.5 rounded-md border border-slate-700/50 uppercase tracking-wide">
+                      <span className="text-[10px] font-bold bg-[#2A2A2A] text-[#737373] px-2 py-0.5 rounded-md border border-[#2A2A2A]/50 uppercase tracking-wide">
                         {entry.paymentMethod}
                       </span>
                     </TableCell>
-                    <TableCell className="px-6 text-xs text-[#94A3B8] whitespace-nowrap">
+                    <TableCell className="px-6 text-xs text-[#737373] whitespace-nowrap">
                       {new Date(entry.createdAt).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
@@ -607,7 +603,7 @@ export default function Database() {
                                 paymentMethod: entry.paymentMethod,
                               });
                             }}
-                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-[#2563EB] hover:bg-[#161616] dark:hover:bg-[#2A2A2A] rounded-md transition-colors"
                             aria-label={`Edit guest entry for ${entry.name}`}
                           >
                             <Edit2 size={16} />
@@ -616,7 +612,7 @@ export default function Database() {
                         {permissions.includes(PERMISSIONS.DELETE_ENTRIES) && (
                           <button
                             onClick={() => setEntryToDelete(entry.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-[#EF4444] hover:bg-[#161616] dark:hover:bg-[#2A2A2A] rounded-md transition-colors"
                             aria-label={`Delete guest entry for ${entry.name}`}
                           >
                             <Trash2 size={16} />
@@ -630,10 +626,10 @@ export default function Database() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
+        </div>
 
         {/* Pagination Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-800 p-4 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-500 bg-gray-50/50 dark:bg-gray-800/30 gap-4">
+        <div className="border-t border-[#2A2A2A] dark:border-[#2A2A2A] p-4 flex flex-col sm:flex-row items-center justify-between text-sm text-[#737373] bg-[#0A0A0A]/50 dark:bg-[#2A2A2A]/30 gap-4">
           <div>
             Showing{" "}
             <span className="font-semibold text-gray-900 dark:text-white">
@@ -670,8 +666,8 @@ export default function Database() {
                   className={cn(
                     "h-8 w-8 rounded-lg text-xs font-semibold transition-colors outline-none",
                     currentPage === page
-                      ? "bg-indigo-600 text-white font-bold"
-                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700",
+                      ? "bg-[#2563EB] text-white font-bold"
+                      : "bg-[#0A0A0A] border border-[#2A2A2A] text-[#737373] hover:bg-[#161616] dark:bg-[#2A2A2A] dark:border-[#2A2A2A] dark:text-[#A3A3A3] dark:hover:bg-[#161616]",
                   )}
                   aria-label={`Go to Page ${page}`}
                 >
@@ -702,10 +698,10 @@ export default function Database() {
         {editForm && (
           <form onSubmit={handleEditSave} className="space-y-4">
             <div>
-              <label
-                htmlFor="editDbGuestNameInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
-              >
+                <label
+                  htmlFor="editDbGuestNameInput"
+                  className="block text-sm font-semibold mb-1.5 text-[#737373] dark:text-[#A3A3A3]"
+                >
                 Name
               </label>
               <Input
@@ -719,10 +715,10 @@ export default function Database() {
               />
             </div>
             <div>
-              <label
-                htmlFor="editDbAmountInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
-              >
+                <label
+                  htmlFor="editDbAmountInput"
+                  className="block text-sm font-semibold mb-1.5 text-[#737373] dark:text-[#A3A3A3]"
+                >
                 Amount (₹)
               </label>
               <Input
@@ -736,7 +732,7 @@ export default function Database() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-[#737373] dark:text-[#A3A3A3]">
                 Payment Method
               </label>
               <div className="flex flex-wrap gap-2">
@@ -753,8 +749,8 @@ export default function Database() {
                     className={cn(
                       "px-3 py-1 text-sm font-medium transition-all border rounded-lg",
                       editForm.paymentMethod === method
-                        ? "bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-500/50 dark:text-indigo-300"
-                        : "bg-transparent border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400",
+                        ? "bg-[#2A2A2A] border-[#2A2A2A] text-white"
+                        : "bg-transparent border-[#2A2A2A] text-[#737373] dark:border-[#2A2A2A] dark:text-[#737373]",
                     )}
                   >
                     {method}
@@ -763,7 +759,7 @@ export default function Database() {
               </div>
             </div>
             {editingEntry && (editingEntry.createdByEmail || editingEntry.updatedByEmail) && (
-              <div className="text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-3 mt-1 space-y-1">
+              <div className="text-xs text-[#737373] dark:text-[#737373] border-t border-[#2A2A2A] dark:border-[#2A2A2A] pt-3 mt-1 space-y-1">
                 {editingEntry.createdByEmail && (
                   <p>
                     <span className="font-semibold">Added by:</span>{" "}

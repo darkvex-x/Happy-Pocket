@@ -6,7 +6,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} className="max-w-sm">
       <div className="space-y-6">
-        <p className="text-sm text-gray-600 dark:text-gray-300">
+        <p className="text-sm text-[#737373]">
           {message}
         </p>
         <div className="flex justify-end space-x-3">

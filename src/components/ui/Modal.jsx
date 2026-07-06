@@ -25,25 +25,27 @@ export default function Modal({ isOpen, onClose, title, children, className }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
         aria-hidden="true"
       />
       {/* Modal Box */}
       <div 
-        className={cn("bg-[var(--card)] z-50 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden m-4 transform transition-all", className)}
+        className={cn("bg-[#161616] z-50 w-full max-w-lg rounded-xl border border-[#2A2A2A] shadow-xl overflow-hidden m-4 transform transition-all", className)}
         role="dialog"
+        aria-labelledby="modal-title"
       >
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-xl font-bold">{title}</h2>
+        <div className="flex items-center justify-between p-5 border-b border-[#2A2A2A]">
+          <h2 id="modal-title" className="text-base font-semibold text-white">{title}</h2>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            className="text-[#737373] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] rounded-lg"
+            aria-label="Close modal"
           >
-            <X size={20} />
+            <X size={16} />
           </button>
         </div>
-        <div className="p-6 overflow-y-auto max-h-[80vh]">
+        <div className="p-5 overflow-y-auto max-h-[70vh]">
           {children}
         </div>
       </div>

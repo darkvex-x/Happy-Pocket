@@ -40,7 +40,7 @@ export default function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-[#1F2937] bg-[#0B1220]/95 flex items-center justify-between px-5 sticky top-0 z-40 backdrop-blur-md">
+    <header className="h-16 border-b border-[#2A2A2A] bg-[#0A0A0A]/95 flex items-center justify-between px-5 sticky top-0 z-40 backdrop-blur-md">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-sm">
         {breadcrumbs.map((crumb, index) => (
@@ -49,13 +49,13 @@ export default function Header() {
               className={
                 index === breadcrumbs.length - 1
                   ? "text-white font-semibold text-[13px]"
-                  : "text-[#4B5563] text-[13px] cursor-pointer hover:text-slate-300 transition-colors"
+                  : "text-[#737373] text-[13px] cursor-pointer hover:text-white transition-colors"
               }
             >
               {crumb}
             </span>
             {index < breadcrumbs.length - 1 && (
-              <ChevronRight size={13} className="text-[#374151]" />
+              <ChevronRight size={13} className="text-[#525252]" />
             )}
           </React.Fragment>
         ))}
@@ -63,7 +63,7 @@ export default function Header() {
 
       {/* Right actions */}
       <div className="flex items-center gap-2">
-        <span className="hidden sm:block text-[11px] text-[#4B5563] font-medium tracking-wide">
+        <span className="hidden sm:block text-[11px] text-[#737373] font-medium tracking-wide">
           {new Date().toLocaleDateString("en-US", {
             weekday: "short",
             month: "short",
@@ -72,14 +72,14 @@ export default function Header() {
         </span>
         <button
           onClick={toggleTheme}
-          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#1F2937] bg-[#111827] text-[#6B7280] hover:text-white hover:bg-[#1F2937] transition-all active:scale-95"
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#2A2A2A] bg-[#161616] text-[#737373] hover:text-white hover:bg-[#1E1E1E] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]"
           aria-label="Toggle Theme"
         >
           {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
         </button>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#1F2937] bg-[#111827] text-[11px] font-semibold text-[#6B7280] hover:text-white hover:bg-[#1F2937] transition-all active:scale-95"
+          className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#2A2A2A] bg-[#161616] text-[11px] font-semibold text-[#737373] hover:text-white hover:bg-[#1E1E1E] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]"
           aria-label="Logout"
         >
           <LogOut size={13} />

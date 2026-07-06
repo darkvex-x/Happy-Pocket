@@ -155,12 +155,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-gray-800 bg-[var(--card)] p-8 shadow-sm">
+      <div className="w-full max-w-md rounded-2xl border border-[#2A2A2A] bg-[var(--card)] p-8 shadow-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-white">
             Welcome back
           </h1>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-sm text-[#A3A3A3]">
             Sign in to continue managing your wedding events.
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function Login() {
           <div>
             <label
               htmlFor="loginEmail"
-              className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
             >
               Email
             </label>
@@ -189,7 +189,7 @@ export default function Login() {
           <div>
             <label
               htmlFor="loginPassword"
-              className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
             >
               Password
             </label>
@@ -216,11 +216,11 @@ export default function Login() {
 
         {/* Divider */}
         <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-          <span className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">
+          <div className="h-px flex-1 bg-[#2A2A2A]" />
+          <span className="text-xs font-medium text-[#A3A3A3] uppercase">
             or
           </span>
-          <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+          <div className="h-px flex-1 bg-[#2A2A2A]" />
         </div>
 
         {/* Google Sign-In */}

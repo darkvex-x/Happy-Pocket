@@ -98,16 +98,13 @@ export default function EventCreate() {
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-300">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Create New Event</h1>
-        <p
-          style={{ fontFamily: '"Lemon",Aerial' }}
-          className="text-gray-500 dark:text-gray-400 mt-1"
-        >
+        <p className="text-[#A3A3A3] mt-1">
           Set up a new ledger to start recording Moi transactions.
         </p>
       </div>
 
-      <Card className="border-0 shadow-sm ring-1 ring-gray-200 dark:ring-gray-800">
-        <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-5">
+      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A]">
+        <CardHeader className="border-b border-[#2A2A2A] pb-5">
           <CardTitle>Event Details</CardTitle>
         </CardHeader>
 
@@ -116,7 +113,7 @@ export default function EventCreate() {
             {globalError && (
               <div
                 role="alert"
-                className="p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium animate-in fade-in"
+                className="p-3 bg-[#EF4444]/15 text-[#EF4444] rounded-lg text-sm font-medium animate-in fade-in"
               >
                 {globalError}
               </div>
@@ -125,7 +122,7 @@ export default function EventCreate() {
             <div>
               <label
                 htmlFor="eventNameInput"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
               >
                 Event Name{" "}
                 <span className="text-red-500" aria-hidden="true">
@@ -149,7 +146,7 @@ export default function EventCreate() {
               <div>
                 <label
                   htmlFor="brideNameInput"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
                 >
                   Bride Name
                 </label>
@@ -165,7 +162,7 @@ export default function EventCreate() {
               <div>
                 <label
                   htmlFor="groomNameInput"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
                 >
                   Groom Name
                 </label>
@@ -184,7 +181,7 @@ export default function EventCreate() {
               <div>
                 <label
                   htmlFor="venueInput"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
                 >
                   Venue
                 </label>
@@ -200,7 +197,7 @@ export default function EventCreate() {
               <div>
                 <label
                   htmlFor="functionDateInput"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
                 >
                   Function Date
                 </label>
@@ -218,7 +215,7 @@ export default function EventCreate() {
             <div>
               <label
                 htmlFor="notesInput"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
               >
                 Additional Notes
               </label>
@@ -233,7 +230,7 @@ export default function EventCreate() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex justify-end space-x-3 bg-gray-50/50 dark:bg-gray-800/20 py-4 border-t border-gray-100 dark:border-gray-800 rounded-b-2xl">
+          <CardFooter className="flex justify-end space-x-3 bg-[#111111] py-4 border-t border-[#2A2A2A] rounded-b-2xl">
             <Button
               type="button"
               variant="ghost"

@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import TextArea from "../../components/ui/TextArea";
@@ -42,7 +41,6 @@ import {
   Copy,
   Users,
   Calendar,
-  Clock,
   MapPin,
   MoreVertical,
 } from "lucide-react";
@@ -649,7 +647,7 @@ export default function EventView() {
   return (
     <div className="space-y-5 animate-in fade-in duration-300 pb-20 text-white">
       {/* Compressed Premium Hero Section */}
-      <div className="bg-[#1E293B] rounded-2xl px-5 py-4 border border-[#334155]/50 relative overflow-visible">
+      <div className="bg-[#161616] rounded-xl px-5 py-4 border border-[#2A2A2A]/50 relative overflow-visible">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 z-10">
             <h1 className="text-[17px] font-bold tracking-tight text-white flex items-center">
@@ -660,15 +658,15 @@ export default function EventView() {
                 Active
               </span>
               <span className="text-slate-700 font-normal text-xs">|</span>
-              <span className="text-[#64748B] text-[12px] font-medium flex items-center gap-1.5">
-                <Calendar size={12} className="text-[#6B7280]" />
+              <span className="text-[#A3A3A3] text-[12px] font-medium flex items-center gap-1.5">
+                <Calendar size={12} className="text-[#2563EB]" />
                 {formatDate(activeEvent.functionDate)}
               </span>
               {activeEvent.venue && (
                 <>
                   <span className="text-slate-700 font-normal text-xs">|</span>
-                  <span className="text-[#64748B] text-[12px] font-medium flex items-center gap-1.5 truncate max-w-[200px]" title={activeEvent.venue}>
-                    <MapPin size={12} className="text-[#6B7280]" />
+                  <span className="text-[#A3A3A3] text-[12px] font-medium flex items-center gap-1.5 truncate max-w-[200px]" title={activeEvent.venue}>
+                    <MapPin size={12} className="text-[#2563EB]" />
                     {activeEvent.venue}
                   </span>
                 </>
@@ -682,7 +680,7 @@ export default function EventView() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleShareEvent} 
-                className="h-8 px-3 text-[12px] border-[#334155] bg-[#111827] hover:bg-[#1F2937] text-slate-300 rounded-xl cursor-pointer"
+                className="h-8 px-3 text-[12px] border-[#2A2A2A] bg-[#111111] hover:bg-[#111111] text-slate-300 rounded-xl cursor-pointer"
               >
                 <Share2 className="mr-1.5" size={13} /> Share Event
               </Button>
@@ -692,7 +690,7 @@ export default function EventView() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleOpenEventEdit} 
-                className="h-8 px-3 text-[12px] border-[#334155] bg-[#111827] hover:bg-[#1F2937] text-slate-300 rounded-xl cursor-pointer"
+                className="h-8 px-3 text-[12px] border-[#2A2A2A] bg-[#111111] hover:bg-[#111111] text-slate-300 rounded-xl cursor-pointer"
               >
                 <Edit2 className="mr-1.5" size={13} /> Edit Event
               </Button>
@@ -703,7 +701,7 @@ export default function EventView() {
               <button
                 type="button"
                 onClick={() => setShowEventMenu(!showEventMenu)}
-                className="p-2 rounded-xl bg-[#111827] border border-[#334155] hover:bg-[#1F2937] text-[#6B7280] hover:text-white transition-all active:scale-95 h-8 w-8 flex items-center justify-center cursor-pointer"
+                className="p-2 rounded-xl bg-[#111111] border border-[#2A2A2A] hover:bg-[#111111] text-[#2563EB] hover:text-white transition-all active:scale-95 h-8 w-8 flex items-center justify-center cursor-pointer"
                 aria-label="More Event Actions"
               >
                 <MoreVertical size={15} />
@@ -715,11 +713,11 @@ export default function EventView() {
                     className="fixed inset-0 z-10" 
                     onClick={() => setShowEventMenu(false)}
                   />
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-[#1E293B] border border-[#334155]/60 shadow-2xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-[#161616] border border-[#2A2A2A]/60 shadow-2xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-150">
                     <button
                       type="button"
                       onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-3.5 py-2 text-[12px] font-medium text-[#94A3B8] hover:text-white hover:bg-[#334155]/30 transition-colors cursor-pointer"
+                      className="w-full text-left px-3.5 py-2 text-[12px] font-medium text-[#A3A3A3] hover:text-white hover:bg-[#2A2A2A]/30 transition-colors cursor-pointer"
                     >
                       Export PDF
                     </button>
@@ -748,7 +746,7 @@ export default function EventView() {
                     <button
                       type="button"
                       onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer"
+                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#EF4444] hover:text-red-300 hover:bg-[#EF4444]/10 transition-colors cursor-pointer"
                     >
                       Delete Event
                     </button>
@@ -762,18 +760,18 @@ export default function EventView() {
 
       {/* Statistics Row */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-2xl p-5 border border-[#334155]/50 bg-[#1E293B] flex items-center justify-between group hover:border-[#334155] transition-colors">
+        <div className="rounded-xl p-5 border border-[#2A2A2A]/50 bg-[#161616] flex items-center justify-between group hover:border-[#2A2A2A] transition-colors">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B] mb-1.5">Total Guests</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#A3A3A3] mb-1.5">Total Guests</p>
             <p className="text-2xl font-bold text-white">{activeEvent.totalEntries}</p>
           </div>
           <div className="p-2 bg-slate-500/10 text-slate-400 rounded-xl">
             <Users size={18} />
           </div>
         </div>
-        <div className="rounded-2xl p-5 border border-[#334155]/50 bg-[#1E293B] flex items-center justify-between group hover:border-[#334155] transition-colors">
+        <div className="rounded-xl p-5 border border-[#2A2A2A]/50 bg-[#161616] flex items-center justify-between group hover:border-[#2A2A2A] transition-colors">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#64748B] mb-1.5">Total Collection</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#A3A3A3] mb-1.5">Total Collection</p>
             <p className="text-2xl font-bold text-emerald-400">
               {currency}{activeEvent.totalAmount.toLocaleString("en-IN")}
             </p>
@@ -787,8 +785,8 @@ export default function EventView() {
       <div className="grid grid-cols-1 lg:grid-cols-[32%_minmax(0,1fr)] gap-6 items-start">
         {/* LEFT COLUMN: ENTRY FORM */}
         <div className="lg:sticky lg:top-24">
-          <Card className="border-[#334155]/50 bg-[#1E293B] rounded-2xl overflow-hidden">
-            <CardHeader className="border-b border-[#334155]/50 py-3 px-4 flex flex-row items-center justify-between">
+          <Card className="border-[#2A2A2A]/50 bg-[#161616] rounded-xl overflow-hidden">
+            <CardHeader className="border-b border-[#2A2A2A]/50 py-3 px-4 flex flex-row items-center justify-between">
               <h2 className="text-[13px] font-semibold text-white">New Entry</h2>
               <span className="text-[10px] font-mono font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
                 #{nextReceiptPreview}
@@ -796,14 +794,14 @@ export default function EventView() {
             </CardHeader>
             <form onSubmit={handleCreateEntry}>
               <CardContent className="space-y-3 p-4 pt-3">
-                <div className="flex items-center text-[11px] text-[#6B7280] bg-[#0B1220] py-1.5 px-2.5 rounded-md border border-[#334155]/40">
+                <div className="flex items-center text-[11px] text-[#2563EB] bg-[#0A0A0A] py-1.5 px-2.5 rounded-md border border-[#2A2A2A]/40">
                   <Printer size={11} className="mr-1.5 flex-shrink-0" />
                   <span>Date &amp; Time logged automatically.</span>
                 </div>
                 <div>
                   <label
                     htmlFor="entryNameInput"
-                    className="block text-[10px] font-semibold text-[#64748B] uppercase tracking-wider mb-1"
+                    className="block text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-1"
                   >
                     Guest Name{" "}
                     <span className="text-red-400" aria-hidden="true">
@@ -826,11 +824,11 @@ export default function EventView() {
                     autoFocus
                     tabIndex={1}
                     aria-required="true"
-                    className="h-9 px-3 py-1 text-[13px] placeholder:text-[#374151] border-[#334155] bg-[#111827] focus:border-blue-500"
+                    className="h-9 px-3 py-1 text-[13px] placeholder:text-[#374151] border-[#2A2A2A] bg-[#111111] focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#64748B] uppercase tracking-wider mb-1 flex justify-between">
+                  <label className="block text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-1 flex justify-between">
                     <span>Amount <span className="text-red-400" aria-hidden="true">*</span></span>
                     <span className="text-[10px] text-slate-500 font-normal">({currency})</span>
                   </label>
@@ -853,13 +851,13 @@ export default function EventView() {
                       }
                     }}
                     error={formErrors.amount}
-                    className="text-[13px] font-semibold h-9 px-3 py-1 placeholder:text-[#374151] border-[#334155] bg-[#111827] focus:border-blue-500"
+                    className="text-[13px] font-semibold h-9 px-3 py-1 placeholder:text-[#374151] border-[#2A2A2A] bg-[#111111] focus:border-blue-500"
                     tabIndex={2}
                     aria-required="true"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#64748B] uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-1.5">
                     Payment Method
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -873,11 +871,11 @@ export default function EventView() {
                             paymentMethod: method,
                           }))
                         }
-                        className={cn(
+className={cn(
                           "px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border outline-none cursor-pointer",
                           formData.paymentMethod === method
-                            ? "bg-blue-500/15 border-blue-500/40 text-blue-300"
-                            : "bg-[#111827] border-[#334155] text-[#6B7280] hover:text-slate-200 hover:bg-[#1F2937]",
+                            ? "bg-[#2563EB]/15 border-[#2563EB]/40 text-[#2563EB]"
+                            : "bg-[#111111] border-[#2A2A2A] text-[#737373] hover:text-slate-200 hover:bg-[#111111]",
                         )}
                       >
                         {method}
@@ -903,8 +901,8 @@ export default function EventView() {
 
         {/* RIGHT COLUMN: LIVE RECENT ENTRIES TABLE */}
         <div>
-          <Card className="border-[#334155]/50 bg-[#1E293B] rounded-2xl overflow-hidden">
-            <CardHeader className="border-b border-[#334155]/50 py-3 px-4 md:px-5 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+          <Card className="border-[#2A2A2A]/50 bg-[#161616] rounded-xl overflow-hidden">
+            <CardHeader className="border-b border-[#2A2A2A]/50 py-3 px-4 md:px-5 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
               <h2 className="text-[12px] font-semibold text-white uppercase tracking-widest">
                 Live Ledger
               </h2>
@@ -970,8 +968,8 @@ export default function EventView() {
                       <TableRow
                         key={entry.id}
                         className={cn(
-                          "group transition-all duration-150 border-b border-[#334155]/30",
-                          index % 2 === 0 ? "bg-transparent" : "bg-[#0B1220]/30"
+                          "group transition-all duration-150 border-b border-[#2A2A2A]/30",
+                          index % 2 === 0 ? "bg-transparent" : "bg-[#0A0A0A]/30"
                         )}
                         title={createdInfo + updatedInfo || undefined}
                       >
@@ -983,11 +981,11 @@ export default function EventView() {
                           {entry.name}
                         </TableCell>
                         <TableCell className="hidden sm:table-cell py-2.5">
-                          <span className="text-[10px] font-semibold bg-[#111827] text-[#64748B] px-2 py-0.5 rounded-md border border-[#334155]/50 uppercase tracking-wide">
+                          <span className="text-[10px] font-semibold bg-[#111111] text-[#A3A3A3] px-2 py-0.5 rounded-md border border-[#2A2A2A]/50 uppercase tracking-wide">
                             {entry.paymentMethod}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-xs text-[#94A3B8] py-2.5">
+                        <TableCell className="hidden md:table-cell text-xs text-[#A3A3A3] py-2.5">
                           {entry.time.slice(0, 5)}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-emerald-400 py-2.5 text-[13px]">
@@ -1001,7 +999,7 @@ export default function EventView() {
                             ) && (
                               <button
                                 onClick={() => setPrintEntry(entry)}
-                                className="p-1.5 text-[#4B5563] hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-500/10 cursor-pointer"
+                                className="p-1.5 text-[#737373] hover:text-[#2563EB] transition-colors rounded-lg hover:bg-[#2563EB]/10 cursor-pointer"
                                 title="Print Receipt"
                                 aria-label={`Print receipt for ${entry.name}`}
                               >
@@ -1018,7 +1016,7 @@ export default function EventView() {
                                     paymentMethod: entry.paymentMethod,
                                   });
                                 }}
-                                className="p-1.5 text-slate-400 hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-500/10 cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-[#2563EB] transition-colors rounded-lg hover:bg-[#2563EB]/10 cursor-pointer"
                                 title="Edit"
                                 aria-label={`Edit entry for ${entry.name}`}
                               >
@@ -1030,7 +1028,7 @@ export default function EventView() {
                             ) && (
                               <button
                                 onClick={() => setEntryToDelete(entry.id)}
-                                className="p-1.5 text-[#4B5563] hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10 cursor-pointer"
+                                className="p-1.5 text-[#737373] hover:text-[#EF4444] transition-colors rounded-lg hover:bg-[#EF4444]/10 cursor-pointer"
                                 title="Delete"
                                 aria-label={`Delete entry for ${entry.name}`}
                               >
@@ -1107,11 +1105,11 @@ export default function EventView() {
                         paymentMethod: method,
                       }))
                     }
-                    className={cn(
+className={cn(
                       "px-3 py-1 text-sm font-medium transition-all border rounded-lg",
                       editForm.paymentMethod === method
-                        ? "bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-900/40 dark:border-indigo-500/50 dark:text-indigo-300"
-                        : "bg-transparent border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400",
+                        ? "bg-[#2563EB]/15 border-[#2563EB]/40 text-[#2563EB]"
+                        : "bg-transparent border-[#2A2A2A] text-[#737373] hover:text-slate-200 hover:bg-[#111111]",
                     )}
                   >
                     {method}
@@ -1368,7 +1366,7 @@ export default function EventView() {
         <div className="space-y-6">
           {/* Share Link Row */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h3 className="text-sm font-semibold text-[#A3A3A3]">
               Share Link
             </h3>
             <div className="flex gap-2">
@@ -1379,7 +1377,7 @@ export default function EventView() {
                   ":shareId",
                   activeEvent?.shareId || "",
                 )}`}
-                className="flex-1 h-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 select-all focus:outline-none"
+                className="flex-1 h-10 rounded-lg border border-[#2A2A2A] bg-[#111111]/50 px-3 py-2 text-xs text-[#737373] select-all focus:outline-none"
               />
               <Button variant="outline" size="sm" onClick={handleCopyLink} title="Copy share link">
                 <Copy size={16} />
@@ -1388,11 +1386,11 @@ export default function EventView() {
           </div>
 
           {/* Divider */}
-          <div className="h-px bg-gray-200 dark:bg-gray-800" />
+          <div className="h-px bg-[#2A2A2A]" />
 
           {/* Add Helper Form */}
           <form onSubmit={handleAddHelper} className="space-y-2">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h3 className="text-sm font-semibold text-[#A3A3A3]">
               Add Helper
             </h3>
             <div className="flex gap-2">
@@ -1421,17 +1419,17 @@ export default function EventView() {
                 This event has not been shared with any helpers yet.
               </p>
             ) : (
-              <ul className="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden bg-gray-50/50 dark:bg-gray-900/10">
+              <ul className="divide-y divide-[#2A2A2A] border border-[#2A2A2A] rounded-xl overflow-hidden bg-[#111111]/50">
                 {activeEvent.sharedEmails.map((email) => (
                   <li
                     key={email}
-                    className="flex justify-between items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-300"
+                    className="flex justify-between items-center px-4 py-3 text-sm text-[#A3A3A3]"
                   >
                     <span className="truncate">{email}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveHelper(email)}
-                      className="text-red-500 hover:text-red-600 p-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                      className="text-[#EF4444] hover:text-red-600 p-1.5 hover:bg-[#EF4444]/10 rounded-lg transition-colors"
                       title="Revoke access"
                     >
                       <UserMinus size={15} />
