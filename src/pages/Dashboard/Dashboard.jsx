@@ -7,13 +7,8 @@ import {
   TrendingUp,
   Plus,
   ArrowRight,
+  ChevronRight,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import {
   Table,
@@ -52,7 +47,7 @@ export default function Dashboard() {
     const unsubscribeEvents = StorageService.subscribeToEvents(
       (loadedEvents) => {
         setEvents(loadedEvents);
-        setRecentEvents(loadedEvents.slice(0, 3));
+        setRecentEvents(loadedEvents.slice(0, 5));
       },
     );
 
@@ -80,74 +75,61 @@ export default function Dashboard() {
         title: "Total Events",
         value: String(totalEvents),
         icon: Calendar,
-        color: "text-blue-400",
-        bg: "bg-blue-500/10",
-        glow: "hover:border-blue-500/30",
+        iconColor: "text-blue-400",
+        iconBg: "bg-blue-500/10",
       },
       {
         title: "Total Entries",
         value: totalEntries.toLocaleString("en-IN"),
         icon: Users,
-        color: "text-purple-400",
-        bg: "bg-purple-500/10",
-        glow: "hover:border-purple-500/30",
+        iconColor: "text-slate-400",
+        iconBg: "bg-slate-500/10",
       },
       {
         title: "Total Collection",
         value: `${currency} ${totalCollection.toLocaleString("en-IN")}`,
         icon: IndianRupee,
-        color: "text-emerald-400",
-        bg: "bg-emerald-500/10",
-        glow: "hover:border-emerald-500/30",
+        iconColor: "text-emerald-400",
+        iconBg: "bg-emerald-500/10",
       },
       {
         title: "Today's Collection",
         value: `${currency} ${todaysCollection.toLocaleString("en-IN")}`,
         icon: TrendingUp,
-        color: "text-amber-400",
-        bg: "bg-amber-500/10",
-        glow: "hover:border-amber-500/30",
+        iconColor: "text-emerald-400",
+        iconBg: "bg-emerald-500/10",
       },
     ],
     [totalEvents, totalEntries, totalCollection, todaysCollection, currency],
   );
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 text-white">
-      {/* Header & CTA */}
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-            Overview
-          </h1>
-          <p className="text-slate-400 mt-1 text-sm">
-            Welcome back to Digi Moi. Here is your summary.
-          </p>
+          <h1 className="text-xl font-bold tracking-tight text-white">Overview</h1>
+          <p className="text-[#6B7280] mt-0.5 text-sm">Welcome back to Digi Moi.</p>
         </div>
         {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
           <Button
-            size="lg"
-            className="w-full sm:w-auto shadow-md"
+            size="default"
+            className="w-full sm:w-auto"
             onClick={() => navigate(ROUTES.CREATE_EVENT)}
           >
-            <Plus className="mr-2" size={20} />
-            Create New Event
+            <Plus className="mr-1.5" size={15} />
+            Create Event
           </Button>
         )}
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {isLoading
           ? Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-slate-800 rounded-2xl p-6 border border-slate-700/30 shadow-xl">
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="h-12 w-12 rounded-2xl flex-shrink-0 bg-slate-700" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-20 bg-slate-700" />
-                    <Skeleton className="h-6 w-24 bg-slate-700" />
-                  </div>
-                </div>
+              <div key={i} className="rounded-2xl border border-[#334155]/50 bg-[#1E293B] p-5">
+                <Skeleton className="h-3 w-20 bg-[#334155] rounded mb-3" />
+                <Skeleton className="h-6 w-24 bg-[#334155] rounded" />
               </div>
             ))
           : stats.map((stat, i) => {
@@ -155,15 +137,17 @@ export default function Dashboard() {
               return (
                 <div
                   key={i}
-                  className={`bg-slate-800 rounded-2xl p-6 border border-slate-700/30 shadow-xl relative overflow-hidden group transition-all duration-300 ${stat.glow}`}
+                  className="rounded-2xl border border-[#334155]/50 bg-[#1E293B] p-5 group hover:border-[#334155] transition-colors duration-200"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{stat.title}</p>
-                      <h3 className="text-2xl font-extrabold mt-1 text-white">{stat.value}</h3>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest text-[#64748B] mb-2">
+                        {stat.title}
+                      </p>
+                      <p className="text-2xl font-bold text-white leading-none">{stat.value}</p>
                     </div>
-                    <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon size={22} />
+                    <div className={`p-2 rounded-xl ${stat.iconBg} ${stat.iconColor} mt-0.5`}>
+                      <Icon size={16} />
                     </div>
                   </div>
                 </div>
@@ -171,24 +155,27 @@ export default function Dashboard() {
             })}
       </div>
 
-      {/* Recent Events Table */}
-      <div className="bg-slate-800 rounded-2xl border border-slate-700/30 shadow-xl overflow-hidden">
-        <div className="flex flex-row items-center justify-between py-5 px-6 border-b border-slate-700/30">
-          <h2 className="text-lg font-bold text-white">Recent Events</h2>
-          <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.HISTORY)} className="text-slate-400 hover:text-white">
-            View All <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+      {/* Recent Events */}
+      <div className="rounded-2xl border border-[#334155]/50 bg-[#1E293B] overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#334155]/50">
+          <h2 className="text-[14px] font-semibold text-white">Recent Events</h2>
+          <button
+            onClick={() => navigate(ROUTES.HISTORY)}
+            className="flex items-center gap-1 text-[12px] text-[#6B7280] hover:text-blue-400 transition-colors font-medium"
+          >
+            View all <ArrowRight size={12} />
+          </button>
         </div>
-        <div className="p-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 430px)', minHeight: '200px' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: "calc(100vh - 400px)", minHeight: "200px" }}>
           {isLoading ? (
-            <div className="p-6 space-y-4">
-              <Skeleton className="h-10 w-full bg-slate-700" />
-              <Skeleton className="h-10 w-full bg-slate-700" />
-              <Skeleton className="h-10 w-full bg-slate-700" />
+            <div className="p-5 space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-9 w-full bg-[#334155] rounded-xl" />
+              ))}
             </div>
           ) : recentEvents.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
-              <p className="text-sm">No events found.</p>
+            <div className="p-12 text-center">
+              <p className="text-[#6B7280] text-sm">No events found.</p>
               {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
                 <Button variant="outline" size="sm" className="mt-4" onClick={() => navigate(ROUTES.CREATE_EVENT)}>
                   Create Event
@@ -197,65 +184,57 @@ export default function Dashboard() {
             </div>
           ) : (
             <Table>
-              <TableHeader className="sticky top-0 bg-slate-950/90 z-10 backdrop-blur-sm">
+              <TableHeader>
                 <TableRow>
-                  <TableHead>Event Name</TableHead>
+                  <TableHead>Event</TableHead>
                   <TableHead className="hidden md:table-cell">Date</TableHead>
                   <TableHead className="hidden lg:table-cell">Venue</TableHead>
                   <TableHead className="text-right">Entries</TableHead>
                   <TableHead className="text-right">Collection</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead className="w-16"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentEvents.map((event) => (
                   <TableRow
                     key={event.id}
-                    className="cursor-pointer hover:bg-slate-700/40 transition-colors"
-                    onClick={() =>
-                      navigate(ROUTES.CURRENT_EVENT, {
-                        state: { eventId: event.id },
-                      })
-                    }
+                    className="cursor-pointer"
+                    onClick={() => navigate(ROUTES.CURRENT_EVENT, { state: { eventId: event.id } })}
                   >
-                    <TableCell className="font-semibold text-white">
+                    <TableCell className="font-semibold text-white py-3">
                       {event.eventName}
-                      <div className="md:hidden text-xs text-slate-500 mt-1">
-                        {new Date(event.functionDate).toLocaleDateString(
-                          "en-IN",
-                          { day: "numeric", month: "short", year: "numeric" },
-                        )}
+                      <div className="md:hidden text-[11px] text-[#6B7280] mt-0.5">
+                        {new Date(event.functionDate).toLocaleDateString("en-IN", {
+                          day: "numeric", month: "short", year: "numeric",
+                        })}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell text-slate-400">
-                      {new Date(event.functionDate).toLocaleDateString(
-                        "en-IN",
-                        { day: "numeric", month: "short", year: "numeric" },
-                      )}
+                    <TableCell className="hidden md:table-cell text-[#94A3B8] py-3 text-[13px]">
+                      {new Date(event.functionDate).toLocaleDateString("en-IN", {
+                        day: "numeric", month: "short", year: "numeric",
+                      })}
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell text-slate-400">
+                    <TableCell className="hidden lg:table-cell text-[#94A3B8] py-3 text-[13px]">
                       {event.venue || "—"}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      <Badge variant="default">{event.totalEntries}</Badge>
+                    <TableCell className="text-right py-3">
+                      <span className="text-[12px] font-semibold text-slate-300 bg-[#0B1220] px-2 py-0.5 rounded-md border border-[#334155]/60">
+                        {event.totalEntries}
+                      </span>
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-emerald-400">
+                    <TableCell className="text-right font-semibold text-emerald-400 py-3 text-[13px]">
                       {currency} {event.totalAmount.toLocaleString("en-IN")}
                     </TableCell>
-                    <TableCell className="text-right pr-6">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-slate-400 hover:text-white"
+                    <TableCell className="text-right pr-4 py-3">
+                      <button
+                        className="text-[11px] text-[#6B7280] hover:text-blue-400 transition-colors font-medium flex items-center gap-0.5 ml-auto"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(ROUTES.CURRENT_EVENT, {
-                            state: { eventId: event.id },
-                          });
+                          navigate(ROUTES.CURRENT_EVENT, { state: { eventId: event.id } });
                         }}
                       >
-                        Open
-                      </Button>
+                        Open <ChevronRight size={11} />
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}

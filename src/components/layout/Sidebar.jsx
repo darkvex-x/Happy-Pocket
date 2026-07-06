@@ -13,62 +13,55 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden md:flex flex-col border-r border-slate-800 bg-slate-900 h-screen sticky top-0 md:w-20 lg:w-64 transition-all duration-300 z-50 text-white">
-      <div className="p-4 lg:p-6 h-16 flex items-center justify-center lg:justify-start border-b border-slate-800/40">
-        <img
-          src="/logo-icon.png"
-          alt="Digi Moi"
-          className="w-9 h-9 object-contain flex-shrink-0 animate-pulse"
-        />
-        <h1
-          style={{
-            fontFamily: "'Sekuya', serif",
-            fontSize: "25px",
-            fontWeight: "700",
-            background: "linear-gradient(90deg,#7C3AED,#ff0a7a)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            margin: 7,
-            letterSpacing: "-0.5px",
-            textShadow: "0 2px 5px rgba(0,0,0,0.2)"
-          }}
-          className="hidden lg:block ml-3 text-xl font-bold truncate"
-        >
-          Digi Moi
-        </h1>
+    <aside className="hidden md:flex flex-col bg-[#111827] h-screen sticky top-0 md:w-16 lg:w-56 transition-all duration-300 z-50 border-r border-[#1F2937]">
+      {/* Logo */}
+      <div className="h-14 px-4 flex items-center justify-center lg:justify-start border-b border-[#1F2937] gap-2.5 flex-shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+          <img
+            src="/logo-icon.png"
+            alt="Digi Moi"
+            className="w-5 h-5 object-contain"
+          />
+        </div>
+        <div className="hidden lg:flex flex-col leading-none">
+          <span className="font-bold text-[15px] text-white tracking-tight">Digi Moi</span>
+          <span className="text-[10px] text-[#4B5563] font-medium tracking-wide">Wedding Collection</span>
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-2 mt-6 overflow-y-auto no-scrollbar">
+      {/* Nav */}
+      <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto no-scrollbar">
         {visibleItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.path}
               to={item.path}
+              title={item.name}
               className={({ isActive }) =>
-                `flex items-center md:justify-center lg:justify-start px-3.5 py-3 rounded-xl transition-all duration-300 group relative ${
+                `flex items-center md:justify-center lg:justify-start gap-3 px-2.5 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 group ${
                   isActive
-                    ? "bg-slate-800 text-white font-semibold shadow-lg shadow-purple-500/5 border-l-[3px] border-purple-500 pl-3"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                    ? "bg-blue-600/15 text-blue-400 border border-blue-500/20"
+                    : "text-[#6B7280] hover:text-slate-200 hover:bg-[#1F2937]"
                 }`
               }
-              title={item.name}
             >
-              <Icon size={20} className="flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
-              <span className="hidden lg:block ml-3 whitespace-nowrap text-sm tracking-wide">
-                {item.name}
-              </span>
+              <Icon
+                size={16}
+                className="flex-shrink-0 transition-transform duration-150 group-hover:scale-105"
+              />
+              <span className="hidden lg:block whitespace-nowrap">{item.name}</span>
             </NavLink>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
-        <div className="hidden lg:block text-xs text-slate-500 text-center tracking-widest font-mono">
+      {/* Footer */}
+      <div className="p-3 border-t border-[#1F2937]">
+        <div className="hidden lg:block text-[10px] text-[#374151] text-center tracking-widest font-mono">
           v1.0.0 Pro
         </div>
       </div>
     </aside>
   );
 }
-

@@ -40,47 +40,49 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-900 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40 bg-opacity-95 backdrop-blur-md text-white">
-      <div className="flex items-center text-sm font-medium">
+    <header className="h-14 border-b border-[#1F2937] bg-[#0B1220]/95 flex items-center justify-between px-5 sticky top-0 z-40 backdrop-blur-md">
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-1.5 text-sm">
         {breadcrumbs.map((crumb, index) => (
           <React.Fragment key={index}>
             <span
               className={
                 index === breadcrumbs.length - 1
-                  ? "text-white font-semibold cursor-default"
-                  : "text-slate-400 cursor-pointer hover:text-white transition-colors"
+                  ? "text-white font-semibold text-[13px]"
+                  : "text-[#4B5563] text-[13px] cursor-pointer hover:text-slate-300 transition-colors"
               }
             >
               {crumb}
             </span>
             {index < breadcrumbs.length - 1 && (
-              <ChevronRight size={16} className="text-slate-500 mx-1.5" />
+              <ChevronRight size={13} className="text-[#374151]" />
             )}
           </React.Fragment>
         ))}
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="hidden sm:block text-sm text-slate-400 font-medium">
+      {/* Right actions */}
+      <div className="flex items-center gap-2">
+        <span className="hidden sm:block text-[11px] text-[#4B5563] font-medium tracking-wide">
           {new Date().toLocaleDateString("en-US", {
             weekday: "short",
             month: "short",
             day: "numeric",
           })}
-        </div>
+        </span>
         <button
           onClick={toggleTheme}
-          className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-755 dark:bg-slate-800 dark:hover:bg-slate-700 transition-all text-slate-300 hover:text-white active:scale-95 border border-slate-800/80 shadow-sm"
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-[#1F2937] bg-[#111827] text-[#6B7280] hover:text-white hover:bg-[#1F2937] transition-all active:scale-95"
           aria-label="Toggle Theme"
         >
-          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
         </button>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 transition-all hover:bg-slate-700 hover:text-white active:scale-95 shadow-sm"
+          className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#1F2937] bg-[#111827] text-[11px] font-semibold text-[#6B7280] hover:text-white hover:bg-[#1F2937] transition-all active:scale-95"
           aria-label="Logout"
         >
-          <LogOut size={16} />
+          <LogOut size={13} />
           <span className="hidden sm:inline">Logout</span>
         </button>
       </div>

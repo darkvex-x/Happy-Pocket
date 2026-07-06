@@ -126,17 +126,14 @@ export default function EventHistory() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">Event History</h1>
+            <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">Event History</h1>
             {!isLoading && events.length > 0 && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#7C3AED]/10 text-[#7C3AED] border border-[#7C3AED]/20 uppercase tracking-wider">
                 {events.length} {events.length === 1 ? "event" : "events"}
               </span>
             )}
           </div>
-          <p
-            style={{ fontFamily: '"Lemon",Aerial' }}
-            className="text-gray-500 dark:text-gray-400 mt-1"
-          >
+          <p className="text-slate-400 mt-1 text-sm">
             Access, print, and manage all of your past operations here.
           </p>
         </div>
@@ -167,16 +164,16 @@ export default function EventHistory() {
             {events.map((event) => (
             <Card
               key={event.id}
-              className="border-0 shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 flex flex-col group hover:shadow-md transition-shadow relative overflow-hidden"
+              className="border border-slate-800 bg-[#1E293B] shadow-md flex flex-col group hover:shadow-lg hover:border-purple-500/25 transition-all duration-300 relative overflow-hidden"
             >
               {/* Decorative Gradient Background */}
-              <div className="absolute top-0 right-0 -mr-12 -mt-12 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full pointer-events-none blur-2xl group-hover:from-indigo-500/20 transition-colors"></div>
+              <div className="absolute top-0 right-0 -mr-12 -mt-12 w-32 h-32 bg-gradient-to-br from-[#7C3AED]/5 to-transparent rounded-full pointer-events-none blur-2xl group-hover:from-[#7C3AED]/10 transition-colors"></div>
 
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl line-clamp-1 pr-8">
+                <CardTitle className="text-lg font-bold text-white line-clamp-1 pr-8">
                   {event.eventName}
                 </CardTitle>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                <div className="text-xs font-semibold text-slate-400 mt-1 line-clamp-1">
                   {event.brideName || event.groomName ? (
                     <span>
                       {event.brideName}{" "}
@@ -196,16 +193,16 @@ export default function EventHistory() {
 
               <CardContent className="flex-1 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl flex items-center space-x-3">
-                    <div className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 p-2 rounded-lg">
-                      <IndianRupee size={18} />
+                  <div className="bg-slate-950/60 p-4 rounded-xl flex items-center space-x-3 border border-slate-800/40">
+                    <div className="bg-emerald-500/10 text-emerald-400 p-2 rounded-lg">
+                      <IndianRupee size={16} />
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 tracking-wider">
+                      <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                         Collected
                       </div>
                       <div
-                        className="font-bold text-gray-900 dark:text-gray-100 leading-tight block truncate sm:max-w-24 md:max-w-none"
+                        className="font-bold text-white leading-tight block truncate sm:max-w-24 md:max-w-none text-sm"
                         title={`${currency}${event.totalAmount.toLocaleString("en-IN")}`}
                       >
                         {currency}
@@ -214,15 +211,15 @@ export default function EventHistory() {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl flex items-center space-x-3">
-                    <div className="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 p-2 rounded-lg">
-                      <Users size={18} />
+                  <div className="bg-slate-950/60 p-4 rounded-xl flex items-center space-x-3 border border-slate-800/40">
+                    <div className="bg-purple-500/10 text-purple-400 p-2 rounded-lg">
+                      <Users size={16} />
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 tracking-wider">
+                      <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
                         Entries
                       </div>
-                      <div className="font-bold text-gray-900 dark:text-gray-100 leading-tight block truncate text-base">
+                      <div className="font-bold text-white leading-tight block truncate text-sm">
                         {event.totalEntries}
                       </div>
                     </div>
@@ -230,52 +227,52 @@ export default function EventHistory() {
                 </div>
               </CardContent>
 
-              <CardFooter className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 py-4 grid grid-cols-4 gap-2">
+              <CardFooter className="border-t border-slate-800/60 bg-slate-900/40 py-3 px-4 grid grid-cols-4 gap-2">
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="w-full text-xs"
+                  className="w-full text-xs h-8 px-2"
                   title="Open Event"
                   aria-label={`Open event ledger for ${event.eventName}`}
                   onClick={() => handleOpen(event.id)}
                 >
-                  <ExternalLink size={16} />
+                  <ExternalLink size={14} />
                 </Button>
                 {permissions.includes(PERMISSIONS.PRINT_RECEIPT) && (
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-full text-xs"
+                    className="w-full text-xs h-8 px-2"
                     title="Print Summary"
                     aria-label={`Print summary receipt for ${event.eventName}`}
                     onClick={() => handlePrintSummary(event)}
                   >
-                    <Printer size={16} />
+                    <Printer size={14} />
                   </Button>
                 )}
                 {permissions.includes(PERMISSIONS.EDIT_EVENT) && (
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-full text-xs"
+                    className="w-full text-xs h-8 px-2"
                     title="Duplicate Event"
                     aria-label={`Duplicate event ledger for ${event.eventName}`}
                     disabled={isDuplicating}
                     onClick={() => handleDuplicate(event)}
                   >
-                    <Copy size={16} />
+                    <Copy size={14} />
                   </Button>
                 )}
                 {permissions.includes(PERMISSIONS.DELETE_EVENT) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full text-xs text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
+                    className="w-full text-xs h-8 px-2 text-red-400 hover:bg-red-500/10 hover:text-red-300"
                     title="Delete Event"
                     aria-label={`Delete event ledger for ${event.eventName}`}
                     onClick={() => setEventToDelete(event)}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </Button>
                 )}
               </CardFooter>

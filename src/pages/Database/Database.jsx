@@ -442,9 +442,9 @@ export default function Database() {
         </div>
       </div>
 
-      <Card className="flex-1 flex flex-col border-0 shadow-sm ring-1 ring-gray-200 dark:ring-gray-800 overflow-hidden">
+      <div className="flex-1 flex flex-col border border-slate-800 bg-[#1E293B] shadow-md rounded-2xl overflow-hidden">
         {/* Top Controls Bar */}
-        <div className="p-4 md:p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 flex flex-col xl:flex-row gap-4 justify-between xl:items-center">
+        <div className="p-4 md:p-5 border-b border-slate-800/60 bg-slate-900/40 flex flex-col xl:flex-row gap-4 justify-between xl:items-center">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full xl:w-auto">
             <div className="w-full md:w-64">
               <Dropdown
@@ -454,12 +454,12 @@ export default function Database() {
                   value: e.id,
                   label: e.eventName,
                 }))}
-                className="bg-white shadow-sm"
+                className="bg-[#111827] border-slate-850"
                 disabled={isLoading || events.length === 0}
               />
             </div>
 
-            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-xs font-semibold text-slate-400 bg-slate-950/60 px-3 py-2 rounded-lg border border-slate-800">
               Showing {filteredTotals.count} entries • Total: ₹
               {filteredTotals.amount.toLocaleString("en-IN")}
             </div>
@@ -470,7 +470,7 @@ export default function Database() {
               placeholder="Search name, receipt..."
               value={displayQuery}
               onChange={handleSearchChange}
-              className="w-full sm:w-64 bg-white shadow-sm"
+              className="w-full sm:w-64 bg-[#111827] border-slate-850 text-slate-200 placeholder:text-slate-550"
             />
             <Dropdown
               value={paymentFilter}
@@ -482,7 +482,7 @@ export default function Database() {
                 { value: "All", label: "All Methods" },
                 ...PAYMENT_METHODS,
               ]}
-              className="w-full sm:w-48 bg-white shadow-sm"
+              className="w-full sm:w-48 bg-[#111827] border-slate-850"
             />
           </div>
         </div>
@@ -564,29 +564,29 @@ export default function Database() {
                   <TableRow
                     key={entry.id}
                     className={cn(
-                      "hover:bg-blue-50/50 dark:hover:bg-blue-900/10",
+                      "hover:bg-slate-800/40 transition-colors border-b border-slate-800/40",
                       index % 2 === 0
-                        ? "bg-white dark:bg-[var(--card)]"
-                        : "bg-gray-50/30 dark:bg-gray-800/10",
+                        ? "bg-slate-900/10"
+                        : "bg-[#1E293B]/20",
                     )}
                     title={createdInfo + updatedInfo || undefined}
                   >
-                    <TableCell className="px-6 font-mono text-xs text-gray-500">
+                    <TableCell className="px-6 font-mono text-xs text-[#7C3AED]">
                       {receiptPrefix}
                       {entry.receiptNumber}
                     </TableCell>
-                    <TableCell className="px-6 font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                    <TableCell className="px-6 font-semibold text-white whitespace-nowrap">
                       {entry.name}
                     </TableCell>
-                    <TableCell className="px-6 text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                    <TableCell className="px-6 text-right font-bold text-[#10B981] whitespace-nowrap">
                       {entry.amount.toLocaleString("en-IN")}
                     </TableCell>
                     <TableCell className="px-6">
-                      <span className="text-xs bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 px-2 py-1 rounded-md">
+                      <span className="text-[10px] font-bold bg-slate-800 text-[#94A3B8] px-2 py-0.5 rounded-md border border-slate-700/50 uppercase tracking-wide">
                         {entry.paymentMethod}
                       </span>
                     </TableCell>
-                    <TableCell className="px-6 text-sm text-gray-500 whitespace-nowrap">
+                    <TableCell className="px-6 text-xs text-[#94A3B8] whitespace-nowrap">
                       {new Date(entry.createdAt).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
@@ -691,7 +691,7 @@ export default function Database() {
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* EDIT MODAL */}
       <Modal

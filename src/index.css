@@ -1,31 +1,127 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: rgba(124, 58, 237, 0.1);
-  --color-primary-500: #7C3AED;
-  --color-primary-600: #7C3AED;
-  --color-primary-900: rgba(124, 58, 237, 0.2);
+  --color-primary-50: rgba(37, 99, 235, 0.1);
+  --color-primary-500: #2563EB;
+  --color-primary-600: #1D4ED8;
+  --color-primary-900: rgba(37, 99, 235, 0.2);
 }
 
 :root {
-  --background: #0F172A;
-  --foreground: #FFFFFF;
+  --background: #0B1220;
+  --foreground: #F8FAFC;
   --card: #1E293B;
+  --card-surface: #111827;
   --input: #111827;
-  --border: #1E293B;
+  --border: #1F2937;
+  --border-muted: #334155;
+  --primary: #2563EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --muted: #64748B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #6B7280;
 }
 
 .dark {
-  --background: #0F172A;
-  --foreground: #FFFFFF;
+  --background: #0B1220;
+  --foreground: #F8FAFC;
   --card: #1E293B;
+  --card-surface: #111827;
   --input: #111827;
-  --border: #1E293B;
+  --border: #1F2937;
+  --border-muted: #334155;
+  --primary: #2563EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --muted: #64748B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #6B7280;
+}
+
+html, body, #root {
+  height: 100%;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thin custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0B1220;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F2937;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Hide scrollbar for sidebar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Slim scrollbar variant */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #1F2937;
+}
+
+/* Active nav glow (subtle, not distracting) */
+.active-glow {
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Focus ring reset */
+*:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Smooth transition defaults */
+* {
+  box-sizing: border-box;
+  transition-property: none;
+}
+a, button, input, select, textarea {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/* Input date/time picker styling */
+input[type="date"], input[type="time"] {
+  color-scheme: dark;
+}
+
+/* Number input arrows hide */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
