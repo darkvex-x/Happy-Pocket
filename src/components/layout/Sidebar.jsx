@@ -13,10 +13,10 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden md:flex flex-col bg-[#0A0A0A] h-screen sticky top-0 md:w-16 lg:w-56 transition-all duration-300 z-50 border-r border-[#2A2A2A]">
+    <aside className="hidden md:flex flex-col bg-[var(--card-secondary)] h-screen sticky top-0 md:w-16 lg:w-56 transition-all duration-300 z-50 border-r border-[var(--border)]">
       {/* Logo */}
-      <div className="h-16 px-4 flex items-center justify-center lg:justify-start border-b border-[#2A2A2A] gap-3 flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center flex-shrink-0">
+      <div className="h-16 px-4 flex items-center justify-center lg:justify-start border-b border-[var(--border)] gap-3 flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center flex-shrink-0">
           <img
             src="/logo-icon.png"
             alt="Digi Moi"
@@ -24,8 +24,8 @@ export default function Sidebar() {
           />
         </div>
         <div className="hidden lg:flex flex-col leading-none">
-          <span className="font-semibold text-[15px] text-white tracking-tight">Digi Moi</span>
-          <span className="text-[10px] text-[#737373] font-medium tracking-wide mt-0.5">Wedding Collection</span>
+          <span className="font-display font-bold text-[15px] text-[var(--text-primary)] tracking-tight">Digi Moi</span>
+          <span className="font-heading text-[10px] text-[var(--muted)] font-medium tracking-wide mt-0.5">Wedding Collection</span>
         </div>
       </div>
 
@@ -39,10 +39,10 @@ export default function Sidebar() {
               to={item.path}
               title={item.name}
               className={({ isActive }) =>
-                `flex items-center md:justify-center lg:justify-start gap-3 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] ${
+                `flex items-center md:justify-center lg:justify-start gap-3 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background-secondary)] ${
                   isActive
-                    ? "bg-[#2563EB]/15 text-[#2563EB]"
-                    : "text-[#737373] hover:text-white hover:bg-[#161616]"
+                    ? "bg-[var(--primary)]/15 text-[var(--primary)]"
+                    : "text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--card-secondary)]"
                 }`
               }
             >
@@ -50,15 +50,15 @@ export default function Sidebar() {
                 size={18}
                 className="flex-shrink-0 transition-transform duration-150 group-hover:scale-105"
               />
-              <span className="hidden lg:block whitespace-nowrap">{item.name}</span>
+              <span className="hidden lg:block font-heading whitespace-nowrap">{item.name}</span>
             </NavLink>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-[#2A2A2A]">
-        <div className="hidden lg:block text-[10px] text-[#737373] text-center tracking-widest font-mono">
+      <div className="p-3 border-t border-[var(--border)]">
+        <div className="hidden lg:block text-[10px] text-[var(--muted)] text-center tracking-widest font-mono">
           v1.0.0 Pro
         </div>
       </div>

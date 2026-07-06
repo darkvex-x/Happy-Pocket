@@ -155,12 +155,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl border border-[#2A2A2A] bg-[var(--card)] p-8 shadow-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-white">
-            Welcome back
-          </h1>
-          <p className="mt-2 text-sm text-[#A3A3A3]">
+      <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 shadow-sm">
+         <div className="mb-8 text-center">
+           <div className="font-display font-bold text-2xl text-[var(--primary)] mb-3">Digi Moi</div>
+           <h1 className="font-heading text-2xl font-bold text-[var(--text-primary)]">
+             Welcome back
+           </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
             Sign in to continue managing your wedding events.
           </p>
         </div>
@@ -170,7 +171,7 @@ export default function Login() {
           <div>
             <label
               htmlFor="loginEmail"
-              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
+              className="mb-1.5 block text-sm font-semibold text-[var(--muted)]"
             >
               Email
             </label>
@@ -189,7 +190,7 @@ export default function Login() {
           <div>
             <label
               htmlFor="loginPassword"
-              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
+              className="mb-1.5 block text-sm font-semibold text-[var(--muted)]"
             >
               Password
             </label>
@@ -216,11 +217,11 @@ export default function Login() {
 
         {/* Divider */}
         <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#2A2A2A]" />
-          <span className="text-xs font-medium text-[#A3A3A3] uppercase">
+          <div className="h-px flex-1 bg-[var(--border)]" />
+          <span className="text-xs font-medium text-[var(--muted)] uppercase">
             or
           </span>
-          <div className="h-px flex-1 bg-[#2A2A2A]" />
+          <div className="h-px flex-1 bg-[var(--border)]" />
         </div>
 
         {/* Google Sign-In */}

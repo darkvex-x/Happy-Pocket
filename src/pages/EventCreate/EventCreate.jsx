@@ -96,15 +96,15 @@ export default function EventCreate() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <div>
+<div>
         <h1 className="text-3xl font-bold tracking-tight">Create New Event</h1>
-        <p className="text-[#A3A3A3] mt-1">
+        <p className="text-[var(--muted)] mt-1">
           Set up a new ledger to start recording Moi transactions.
         </p>
       </div>
 
-      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A]">
-        <CardHeader className="border-b border-[#2A2A2A] pb-5">
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)]">
+        <CardHeader className="border-b border-[var(--border)] pb-5">
           <CardTitle>Event Details</CardTitle>
         </CardHeader>
 
@@ -113,19 +113,19 @@ export default function EventCreate() {
             {globalError && (
               <div
                 role="alert"
-                className="p-3 bg-[#EF4444]/15 text-[#EF4444] rounded-lg text-sm font-medium animate-in fade-in"
+                className="p-3 bg-[var(--danger)]/15 text-[var(--danger)] rounded-lg text-sm font-medium animate-in fade-in"
               >
                 {globalError}
               </div>
             )}
 
-            <div>
+<div>
               <label
                 htmlFor="eventNameInput"
-                className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
+                className="block text-sm font-medium text-[var(--muted)] mb-1.5"
               >
                 Event Name{" "}
-                <span className="text-red-500" aria-hidden="true">
+                <span className="text-[var(--danger)]" aria-hidden="true">
                   *
                 </span>
               </label>
@@ -143,10 +143,10 @@ export default function EventCreate() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
+               <div>
                 <label
                   htmlFor="brideNameInput"
-                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
+                  className="block text-sm font-medium text-[var(--muted)] mb-1.5"
                 >
                   Bride Name
                 </label>
@@ -159,10 +159,10 @@ export default function EventCreate() {
                   disabled={isLoading}
                 />
               </div>
-              <div>
+               <div>
                 <label
                   htmlFor="groomNameInput"
-                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
+                  className="block text-sm font-medium text-[var(--muted)] mb-1.5"
                 >
                   Groom Name
                 </label>
@@ -177,11 +177,11 @@ export default function EventCreate() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <div>
                 <label
                   htmlFor="venueInput"
-                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
+                  className="block text-sm font-medium text-[var(--muted)] mb-1.5"
                 >
                   Venue
                 </label>
@@ -194,10 +194,10 @@ export default function EventCreate() {
                   disabled={isLoading}
                 />
               </div>
-              <div>
+               <div>
                 <label
                   htmlFor="functionDateInput"
-                  className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
+                  className="block text-sm font-medium text-[var(--muted)] mb-1.5"
                 >
                   Function Date
                 </label>
@@ -212,10 +212,10 @@ export default function EventCreate() {
               </div>
             </div>
 
-            <div>
+             <div>
               <label
                 htmlFor="notesInput"
-                className="block text-sm font-medium text-[#A3A3A3] mb-1.5"
+                className="block text-sm font-medium text-[var(--muted)] mb-1.5"
               >
                 Additional Notes
               </label>
@@ -230,7 +230,7 @@ export default function EventCreate() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex justify-end space-x-3 bg-[#111111] py-4 border-t border-[#2A2A2A] rounded-b-2xl">
+          <CardFooter className="flex justify-end space-x-3 bg-[var(--background-secondary)] py-4 border-t border-[var(--border)] rounded-b-2xl">
             <Button
               type="button"
               variant="ghost"

@@ -7,18 +7,18 @@ const Input = forwardRef(({ className, type = 'text', error, helperText, ...prop
       <input
         type={type}
         className={cn(
-          "flex h-9 w-full rounded-lg border border-[#2A2A2A] bg-[#161616] px-3 py-2 text-sm text-white placeholder:text-[#525252] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 focus:border-[#2563EB] transition-all disabled:cursor-not-allowed disabled:opacity-50",
-          error && "border-[#EF4444]/60 focus:ring-[#EF4444]/20 focus:border-[#EF4444]",
+          "flex h-9 w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)] transition-all disabled:cursor-not-allowed disabled:opacity-50",
+          error && "border-[var(--danger)]/60 focus:ring-[var(--danger)]/20 focus:border-[var(--danger)]",
           className
         )}
         ref={ref}
         {...props}
       />
       {error && (
-        <p className="text-xs text-[#EF4444] font-medium">{error}</p>
+        <p className="text-xs text-[var(--danger)] font-medium">{error}</p>
       )}
       {helperText && !error && (
-        <p className="text-xs text-[#737373]">{helperText}</p>
+        <p className="text-xs text-[var(--muted)]">{helperText}</p>
       )}
     </div>
   );

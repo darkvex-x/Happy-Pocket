@@ -281,10 +281,10 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            User Management
-          </h1>
-          <p className="text-[#A3A3A3] mt-1">
+             <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+             User Management
+           </h1>
+          <p className="text-[var(--muted)] mt-1">
             Manage helpers and their access to the system.
           </p>
         </div>
@@ -303,26 +303,26 @@ export default function UserManagement() {
         <div className="relative max-w-md">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#737373] pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
           />
           <input
             type="text"
             placeholder="Search by name, email or role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex h-10 w-full rounded-lg border border-[#2A2A2A] bg-[#161616] pl-10 pr-3 py-2 text-sm text-white placeholder:text-[#737373] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-shadow"
+            className="flex h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--card)] pl-10 pr-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-shadow"
           />
         </div>
       )}
 
       {/* Users Table */}
-      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A] overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between py-5 px-6 border-b border-[#2A2A2A]">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <UsersRound size={20} className="text-[#2563EB]" />
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)] overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between py-5 px-6 border-b border-[var(--border)]">
+            <CardTitle className="font-heading text-lg flex items-center gap-2 text-[var(--text-primary)]">
+            <UsersRound size={20} className="text-[var(--primary)]" />
             All Users
             {!isLoading && (
-              <Badge variant="default" className="ml-1">
+               <Badge variant="default" className="ml-1 font-number">
                 {filteredUsers.length}
               </Badge>
             )}
@@ -374,31 +374,31 @@ export default function UserManagement() {
                   return (
                     <TableRow
                       key={user.id}
-                      className="hover:bg-[#2A2A2A] transition-colors"
+                      className="hover:bg-[var(--border)] transition-colors"
                     >
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#2563EB]/20 flex items-center justify-center text-[#2563EB] text-sm font-bold">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] text-sm font-bold">
                             {(user.name || user.email || "?")
                               .charAt(0)
                               .toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-white">
+                            <p className="font-medium text-[var(--text-primary)]">
                               {user.name || "—"}
                               {isSelf && (
-                                <span className="ml-2 text-xs text-[#2563EB] font-normal">
+                                <span className="ml-2 text-xs text-[var(--primary)] font-normal">
                                   (you)
                                 </span>
                               )}
                             </p>
-                            <p className="md:hidden text-xs text-[#A3A3A3] mt-0.5">
+                            <p className="md:hidden text-xs text-[var(--muted)] mt-0.5">
                               {user.email || "—"}
                             </p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell text-[#A3A3A3]">
+                      <TableCell className="hidden md:table-cell text-[var(--muted)]">
                         {user.email || "—"}
                       </TableCell>
                       <TableCell>
@@ -425,7 +425,7 @@ export default function UserManagement() {
                           {user.active === false ? "Disabled" : "Active"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="hidden lg:table-cell text-[#A3A3A3] text-sm">
+                      <TableCell className="hidden lg:table-cell text-[var(--muted)] text-sm">
                         {user.createdAt
                           ? new Date(user.createdAt).toLocaleDateString(
                               "en-IN",
@@ -461,8 +461,8 @@ export default function UserManagement() {
                             }
                             className={
                               user.active === false
-                                ? "text-emerald-600 hover:text-emerald-700"
-                                : "text-amber-500 hover:text-amber-600"
+                                ? "text-[var(--success)] hover:text-[var(--success)]/80"
+                                : "text-[var(--warning)] hover:text-[var(--warning)]/80"
                             }
                           >
                             {user.active === false ? (
@@ -486,8 +486,8 @@ export default function UserManagement() {
                             }
                             className={
                               deleteBlocked
-                                ? "text-[#737373] cursor-not-allowed"
-                                : "text-red-500 hover:text-red-600"
+                                ? "text-[var(--muted)] cursor-not-allowed"
+                                : "text-[var(--danger)] hover:text-[var(--danger)]/80"
                             }
                           >
                             <Trash2 size={15} />
@@ -513,7 +513,7 @@ export default function UserManagement() {
           <div>
             <label
               htmlFor="userName"
-              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
+              className="mb-1.5 block text-sm font-semibold text-[var(--muted)]"
             >
               Full Name
             </label>
@@ -534,7 +534,7 @@ export default function UserManagement() {
           <div>
             <label
               htmlFor="userEmail"
-              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
+              className="mb-1.5 block text-sm font-semibold text-[var(--muted)]"
             >
               Email Address
             </label>
@@ -549,7 +549,7 @@ export default function UserManagement() {
               error={formErrors.email}
               disabled={isSubmitting}
             />
-            <p className="text-xs text-[#737373] mt-1">
+            <p className="text-xs text-[var(--muted)] mt-1">
               Must match the email used to sign in.
             </p>
           </div>
@@ -557,7 +557,7 @@ export default function UserManagement() {
           <div>
             <label
               htmlFor="userRole"
-              className="mb-1.5 block text-sm font-semibold text-[#A3A3A3]"
+              className="mb-1.5 block text-sm font-semibold text-[var(--muted)]"
             >
               Role
             </label>
@@ -568,7 +568,7 @@ export default function UserManagement() {
                 setFormData((prev) => ({ ...prev, role: e.target.value }))
               }
               disabled={isSubmitting}
-              className="flex h-10 w-full rounded-lg border border-[#2A2A2A] bg-[#161616] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-shadow disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-shadow disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="helper">Helper</option>
               <option value="admin">Admin</option>

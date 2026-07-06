@@ -366,16 +366,16 @@ export default function Database() {
   const SortableHead = ({ label, sortKey, className }) => (
     <TableHead
       className={cn(
-        "cursor-pointer select-none hover:bg-[#161616] dark:hover:bg-[#2A2A2A] transition-colors group px-6",
+        "cursor-pointer select-none hover:bg-[var(--card-secondary)] transition-colors group px-6",
         className,
       )}
       onClick={() => handleSort(sortKey)}
     >
       <div className="flex items-center space-x-1">
-        <span className="font-semibold text-[#737373] dark:text-[#A3A3A3]">
+        <span className="font-semibold text-[var(--muted)]">
           {label}
         </span>
-        <span className="text-[#737373] group-hover:text-[#A3A3A3] dark:group-hover:text-[#A3A3A3]">
+        <span className="text-[var(--muted)] group-hover:text-[var(--text-secondary)]">
           {sortConfig.key === sortKey ? (
             sortConfig.direction === "asc" ? (
               <ChevronUp size={14} />
@@ -397,8 +397,8 @@ export default function Database() {
     <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col">
       <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Database Viewer</h1>
-          <p className="text-[#737373] mt-1 text-sm">
+          <h1 className="font-heading text-2xl font-semibold tracking-tight text-[var(--text-primary)]">Database Viewer</h1>
+          <p className="text-[var(--muted)] mt-1 text-sm">
             Deep dive, filter, and export all recorded transactions.
           </p>
         </div>
@@ -411,7 +411,7 @@ export default function Database() {
               onClick={handleExportCSV}
               disabled={filteredAndSortedEntries.length === 0}
             >
-              <FileDown size={16} className="mr-1.5 text-[#10B981]" /> CSV
+              <FileDown size={16} className="mr-1.5 text-[var(--success)]" /> CSV
             </Button>
           )}
           {permissions.includes(PERMISSIONS.EXPORT_EXCEL) && (
@@ -421,7 +421,7 @@ export default function Database() {
               onClick={handleExportExcel}
               disabled={filteredAndSortedEntries.length === 0}
             >
-              <FileSpreadsheet size={16} className="mr-1.5 text-[#10B981]" />
+              <FileSpreadsheet size={16} className="mr-1.5 text-[var(--success)]" />
               Excel
             </Button>
           )}
@@ -432,15 +432,15 @@ export default function Database() {
               onClick={handleExportPDF}
               disabled={filteredAndSortedEntries.length === 0}
             >
-              <FileText size={16} className="mr-1.5 text-[#EF4444]" /> PDF
+              <FileText size={16} className="mr-1.5 text-[var(--danger)]" /> PDF
             </Button>
           )}
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col border border-[#2A2A2A] bg-[#161616] shadow-md rounded-xl overflow-hidden">
+<div className="flex-1 flex flex-col border border-[var(--border)] bg-[var(--card)] shadow-md rounded-xl overflow-hidden">
         {/* Top Controls Bar */}
-        <div className="p-4 md:p-5 border-b border-[#2A2A2A]/60 bg-[#111111]/40 flex flex-col xl:flex-row gap-4 justify-between xl:items-center">
+        <div className="p-4 md:p-5 border-b border-[var(--border)]/60 bg-[var(--background-secondary)]/40 flex flex-col xl:flex-row gap-4 justify-between xl:items-center">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full xl:w-auto">
             <div className="w-full md:w-64">
               <Dropdown
@@ -450,14 +450,14 @@ export default function Database() {
                   value: e.id,
                   label: e.eventName,
                 }))}
-                className="bg-[#111111] border-[#2A2A2A]"
+                className="bg-[var(--background-secondary)] border-[var(--border)]"
                 disabled={isLoading || events.length === 0}
               />
             </div>
 
-            <div className="text-xs font-semibold text-[#737373] bg-[#0A0A0A]/60 px-3 py-2 rounded-lg border border-[#2A2A2A]">
-              Showing {filteredTotals.count} entries • Total: ₹
-              {filteredTotals.amount.toLocaleString("en-IN")}
+            <div className="text-xs font-semibold text-[var(--muted)] bg-[var(--background-secondary)]/60 px-3 py-2 rounded-lg border border-[var(--border)]">
+               Showing {filteredTotals.count} entries • Total: ₹
+               <span className="font-number">{filteredTotals.amount.toLocaleString("en-IN")}</span>
             </div>
           </div>
 
@@ -466,8 +466,8 @@ export default function Database() {
               placeholder="Search name, receipt..."
               value={displayQuery}
               onChange={handleSearchChange}
-               className="w-full sm:w-64 bg-[#111111] border-[#2A2A2A] text-slate-200 placeholder:text-[#737373]"
-            />
+               className="w-full sm:w-64 bg-[var(--background-secondary)] border-[var(--border)] text-[var(--text-secondary)] placeholder:text-[var(--muted)]"
+             />
             <Dropdown
               value={paymentFilter}
               onChange={(e) => {
@@ -478,8 +478,8 @@ export default function Database() {
                 { value: "All", label: "All Methods" },
                 ...PAYMENT_METHODS,
               ]}
-               className="w-full sm:w-48 bg-[#111111] border-[#2A2A2A]"
-            />
+               className="w-full sm:w-48 bg-[var(--background-secondary)] border-[var(--border)]"
+             />
           </div>
         </div>
 
@@ -487,7 +487,7 @@ export default function Database() {
         <div className="p-0 flex-1 overflow-y-auto relative" style={{ maxHeight: 'calc(100vh - 290px)', minHeight: '300px' }}>
           {isLoading ? (
             <Table className="w-full border-collapse">
-              <TableHeader className="bg-[#0A0A0A]/80 dark:bg-[#2A2A2A]/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b border-[#2A2A2A]">
+              <TableHeader className="bg-[var(--background-secondary)]/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b border-[var(--border)]">
                 <TableRow>
                   <TableHead>Receipt</TableHead>
                   <TableHead>Guest Name</TableHead>
@@ -532,9 +532,9 @@ export default function Database() {
                   : null
               }
             />
-          ) : (
+) : (
             <Table className="w-full border-collapse">
-              <TableHeader className="bg-[#0A0A0A]/80 dark:bg-[#2A2A2A]/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b border-[#2A2A2A]">
+              <TableHeader className="bg-[var(--background-secondary)]/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm border-b border-[var(--border)]">
                 <TableRow>
                   <SortableHead label="Receipt" sortKey="receiptNumber" />
                   <SortableHead label="Guest Name" sortKey="name" />
@@ -557,70 +557,70 @@ export default function Database() {
                     ? ` · Edited by ${entry.updatedByEmail} on ${new Date(entry.updatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}`
                     : "";
                   return (
-                  <TableRow
-                    key={entry.id}
-                    className={cn(
-                      "hover:bg-[#2A2A2A]/40 transition-colors border-b border-[#2A2A2A]/40",
-                      index % 2 === 0
-                        ? "bg-[#111111]/10"
-                        : "bg-[#161616]/20",
-                    )}
-                    title={createdInfo + updatedInfo || undefined}
-                  >
-                    <TableCell className="px-6 font-mono text-xs text-[#7C3AED]">
-                      {receiptPrefix}
-                      {entry.receiptNumber}
-                    </TableCell>
-                    <TableCell className="px-6 font-semibold text-white whitespace-nowrap">
-                      {entry.name}
-                    </TableCell>
-                    <TableCell className="px-6 text-right font-bold text-[#10B981] whitespace-nowrap">
-                      {entry.amount.toLocaleString("en-IN")}
-                    </TableCell>
-                    <TableCell className="px-6">
-                      <span className="text-[10px] font-bold bg-[#2A2A2A] text-[#737373] px-2 py-0.5 rounded-md border border-[#2A2A2A]/50 uppercase tracking-wide">
-                        {entry.paymentMethod}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-6 text-xs text-[#737373] whitespace-nowrap">
-                      {new Date(entry.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </TableCell>
-                    <TableCell className="px-6 text-right">
-                      <div className="flex justify-end gap-2">
-                        {permissions.includes(PERMISSIONS.EDIT_ENTRY) && (
-                          <button
-                            onClick={() => {
-                              setEditingEntry(entry);
-                              setEditForm({
-                                name: entry.name,
-                                amount: entry.amount,
-                                paymentMethod: entry.paymentMethod,
-                              });
-                            }}
-                            className="p-1.5 text-gray-400 hover:text-[#2563EB] hover:bg-[#161616] dark:hover:bg-[#2A2A2A] rounded-md transition-colors"
-                            aria-label={`Edit guest entry for ${entry.name}`}
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                        )}
-                        {permissions.includes(PERMISSIONS.DELETE_ENTRIES) && (
-                          <button
-                            onClick={() => setEntryToDelete(entry.id)}
-                            className="p-1.5 text-gray-400 hover:text-[#EF4444] hover:bg-[#161616] dark:hover:bg-[#2A2A2A] rounded-md transition-colors"
-                            aria-label={`Delete guest entry for ${entry.name}`}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    <TableRow
+                      key={entry.id}
+                      className={cn(
+                        "hover:bg-[var(--border)]/40 transition-colors border-b border-[var(--border)]/40",
+                        index % 2 === 0
+                          ? "bg-[var(--background-secondary)]/10"
+                          : "bg-[var(--card)]/20",
+                      )}
+                      title={createdInfo + updatedInfo || undefined}
+                    >
+                      <TableCell className="px-6 font-mono text-xs text-[var(--primary)] font-number">
+                        {receiptPrefix}
+                        {entry.receiptNumber}
+                      </TableCell>
+                      <TableCell className="px-6 font-semibold text-[var(--text-primary)] whitespace-nowrap">
+                        {entry.name}
+                      </TableCell>
+                      <TableCell className="px-6 text-right font-bold text-[var(--success)] whitespace-nowrap font-number">
+                        {entry.amount.toLocaleString("en-IN")}
+                      </TableCell>
+                      <TableCell className="px-6">
+                         <span className="text-[10px] font-bold bg-[var(--border)] text-[var(--text-secondary)] px-2 py-0.5 rounded-md border border-[var(--border)]/50 uppercase tracking-wide">
+                          {entry.paymentMethod}
+                        </span>
+                      </TableCell>
+                      <TableCell className="px-6 text-xs text-[var(--muted)] whitespace-nowrap">
+                        {new Date(entry.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
+                      <TableCell className="px-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          {permissions.includes(PERMISSIONS.EDIT_ENTRY) && (
+                            <button
+                              onClick={() => {
+                                setEditingEntry(entry);
+                                setEditForm({
+                                  name: entry.name,
+                                  amount: entry.amount,
+                                  paymentMethod: entry.paymentMethod,
+                                });
+                              }}
+                              className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--background-secondary)] rounded-md transition-colors"
+                              aria-label={`Edit guest entry for ${entry.name}`}
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                          )}
+                          {permissions.includes(PERMISSIONS.DELETE_ENTRIES) && (
+                            <button
+                              onClick={() => setEntryToDelete(entry.id)}
+                              className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--background-secondary)] rounded-md transition-colors"
+                              aria-label={`Delete guest entry for ${entry.name}`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
               </TableBody>
@@ -629,22 +629,22 @@ export default function Database() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="border-t border-[#2A2A2A] dark:border-[#2A2A2A] p-4 flex flex-col sm:flex-row items-center justify-between text-sm text-[#737373] bg-[#0A0A0A]/50 dark:bg-[#2A2A2A]/30 gap-4">
+        <div className="border-t border-[var(--border)] p-4 flex flex-col sm:flex-row items-center justify-between text-sm text-[var(--muted)] bg-[var(--background-secondary)]/50 gap-4">
           <div>
             Showing{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {(currentPage - 1) * ITEMS_PER_PAGE +
-                (paginatedEntries.length > 0 ? 1 : 0)}
-            </span>{" "}
-            to{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {(currentPage - 1) * ITEMS_PER_PAGE + paginatedEntries.length}
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {filteredAndSortedEntries.length}
-            </span>{" "}
-            results
+             <span className="font-semibold text-[var(--text-primary)] font-number">
+               {(currentPage - 1) * ITEMS_PER_PAGE +
+                 (paginatedEntries.length > 0 ? 1 : 0)}
+             </span>{" "}
+             to{" "}
+             <span className="font-semibold text-[var(--text-primary)] font-number">
+               {(currentPage - 1) * ITEMS_PER_PAGE + paginatedEntries.length}
+             </span>{" "}
+             of{" "}
+             <span className="font-semibold text-[var(--text-primary)] font-number">
+               {filteredAndSortedEntries.length}
+             </span>{" "}
+             results
           </div>
 
           <div className="flex items-center gap-2">
@@ -664,10 +664,10 @@ export default function Database() {
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={cn(
-                    "h-8 w-8 rounded-lg text-xs font-semibold transition-colors outline-none",
+                    "h-8 w-8 rounded-lg text-xs font-semibold transition-colors outline-none font-number",
                     currentPage === page
-                      ? "bg-[#2563EB] text-white font-bold"
-                      : "bg-[#0A0A0A] border border-[#2A2A2A] text-[#737373] hover:bg-[#161616] dark:bg-[#2A2A2A] dark:border-[#2A2A2A] dark:text-[#A3A3A3] dark:hover:bg-[#161616]",
+                      ? "bg-[var(--primary)] text-white font-bold"
+                      : "bg-[var(--background-secondary)] border border-[var(--border)] text-[var(--muted)] hover:bg-[var(--card)]",
                   )}
                   aria-label={`Go to Page ${page}`}
                 >
@@ -698,9 +698,9 @@ export default function Database() {
         {editForm && (
           <form onSubmit={handleEditSave} className="space-y-4">
             <div>
-                <label
+                <                label
                   htmlFor="editDbGuestNameInput"
-                  className="block text-sm font-semibold mb-1.5 text-[#737373] dark:text-[#A3A3A3]"
+                  className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
                 >
                 Name
               </label>
@@ -715,9 +715,9 @@ export default function Database() {
               />
             </div>
             <div>
-                <label
+                <                label
                   htmlFor="editDbAmountInput"
-                  className="block text-sm font-semibold mb-1.5 text-[#737373] dark:text-[#A3A3A3]"
+                  className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
                 >
                 Amount (₹)
               </label>
@@ -732,7 +732,7 @@ export default function Database() {
               />
             </div>
             <div>
-                <label className="block text-sm font-semibold mb-2 text-[#737373] dark:text-[#A3A3A3]">
+                <                label className="block text-sm font-semibold mb-2 text-[var(--text-primary)]">
                 Payment Method
               </label>
               <div className="flex flex-wrap gap-2">
@@ -749,8 +749,8 @@ export default function Database() {
                     className={cn(
                       "px-3 py-1 text-sm font-medium transition-all border rounded-lg",
                       editForm.paymentMethod === method
-                        ? "bg-[#2A2A2A] border-[#2A2A2A] text-white"
-                        : "bg-transparent border-[#2A2A2A] text-[#737373] dark:border-[#2A2A2A] dark:text-[#737373]",
+                        ? "bg-[var(--primary)]/15 border-[var(--primary)]/40 text-[var(--primary)]"
+                        : "bg-transparent border-[var(--border)] text-[var(--muted)] dark:border-[var(--border)] dark:text-[var(--muted)]",
                     )}
                   >
                     {method}
@@ -758,8 +758,8 @@ export default function Database() {
                 ))}
               </div>
             </div>
-            {editingEntry && (editingEntry.createdByEmail || editingEntry.updatedByEmail) && (
-              <div className="text-xs text-[#737373] dark:text-[#737373] border-t border-[#2A2A2A] dark:border-[#2A2A2A] pt-3 mt-1 space-y-1">
+            {editForm && (editingEntry.createdByEmail || editingEntry.updatedByEmail) && (
+              <div className="text-xs text-[var(--muted)] border-t border-[var(--border)] pt-3 mt-1 space-y-1">
                 {editingEntry.createdByEmail && (
                   <p>
                     <span className="font-semibold">Added by:</span>{" "}

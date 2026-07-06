@@ -3,12 +3,12 @@ import { cn } from '../../utils/cn';
 
 const Button = forwardRef(({ className, variant = 'primary', size = 'default', isLoading, children, ...props }, ref) => {
   const variants = {
-    primary: "bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-150 rounded-lg",
-    secondary: "bg-[#161616] text-white hover:bg-[#1E1E1E] border border-[#2A2A2A] shadow-sm active:scale-[0.98] transition-all duration-150 rounded-lg",
-    outline: "border border-[#2A2A2A] bg-transparent hover:bg-[#161616] text-[#A3A3A3] hover:text-white active:scale-[0.98] transition-all duration-150 rounded-lg",
-    ghost: "bg-transparent hover:bg-[#161616] text-[#737373] hover:text-white active:scale-[0.98] transition-all duration-150 rounded-lg",
-    danger: "bg-[#EF4444] hover:bg-[#DC2626] text-white font-semibold shadow-sm active:scale-[0.98] transition-all duration-150 rounded-lg",
-    success: "bg-[#10B981] hover:bg-[#059669] text-white font-semibold shadow-sm active:scale-[0.98] transition-all duration-150 rounded-lg",
+    primary: "bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-semibold shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-150 rounded-lg",
+    secondary: "bg-[var(--card-secondary)] text-[var(--text-primary)] hover:bg-[var(--border-hover)] border border-[var(--border)] shadow-sm active:scale-[0.98] transition-all duration-150 rounded-lg",
+    outline: "border border-[var(--border)] bg-transparent hover:bg-[var(--card-secondary)] text-[var(--muted)] hover:text-[var(--text-primary)] active:scale-[0.98] transition-all duration-150 rounded-lg",
+    ghost: "bg-transparent hover:bg-[var(--card-secondary)] text-[var(--muted)] hover:text-[var(--text-primary)] active:scale-[0.98] transition-all duration-150 rounded-lg",
+    danger: "bg-[var(--danger)] hover:bg-[#DC2626] text-white font-semibold shadow-sm active:scale-[0.98] transition-all duration-150 rounded-lg",
+    success: "bg-[var(--success)] hover:bg-[#059669] text-white font-semibold shadow-sm active:scale-[0.98] transition-all duration-150 rounded-lg",
   };
 
   const sizes = {
@@ -23,7 +23,7 @@ const Button = forwardRef(({ className, variant = 'primary', size = 'default', i
       ref={ref}
       disabled={isLoading || props.disabled}
       className={cn(
-        "inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] disabled:opacity-40 disabled:pointer-events-none",
+        "inline-flex items-center justify-center font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] disabled:opacity-40 disabled:pointer-events-none",
         variants[variant],
         sizes[size],
         className

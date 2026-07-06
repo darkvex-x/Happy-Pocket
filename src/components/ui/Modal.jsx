@@ -31,15 +31,15 @@ export default function Modal({ isOpen, onClose, title, children, className }) {
       />
       {/* Modal Box */}
       <div 
-        className={cn("bg-[#161616] z-50 w-full max-w-lg rounded-xl border border-[#2A2A2A] shadow-xl overflow-hidden m-4 transform transition-all", className)}
+        className={cn("bg-[var(--card)] z-50 w-full max-w-lg rounded-xl border border-[var(--border)] shadow-xl overflow-hidden m-4 transform transition-all", className)}
         role="dialog"
         aria-labelledby="modal-title"
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#2A2A2A]">
-          <h2 id="modal-title" className="text-base font-semibold text-white">{title}</h2>
+        <div className="flex items-center justify-between p-5 border-b border-[var(--border)]">
+          <h2 id="modal-title" className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
           <button 
             onClick={onClose}
-            className="text-[#737373] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] rounded-lg"
+            className="text-[var(--muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] rounded-lg"
             aria-label="Close modal"
           >
             <X size={16} />

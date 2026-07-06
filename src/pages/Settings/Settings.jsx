@@ -210,7 +210,7 @@ export default function Settings() {
   const ToggleGroup = ({ options, value, onChange, className }) => (
     <div
       className={cn(
-        "flex rounded-xl overflow-hidden border border-[#2A2A2A] dark:border-[#2A2A2A]",
+        "flex rounded-xl overflow-hidden border border-[var(--border)]",
         className,
       )}
     >
@@ -222,8 +222,8 @@ export default function Settings() {
           className={cn(
             "px-4 py-2.5 text-sm font-semibold transition-all flex-1",
             value === opt
-              ? "bg-[#2563EB] text-white shadow-inner"
-              : "bg-white dark:bg-[#161616] text-[#737373] dark:text-[#737373] hover:bg-[#2A2A2A] dark:hover:bg-[#2A2A2A]",
+              ? "bg-[var(--primary)] text-white shadow-inner"
+              : "bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--border-hover)]",
           )}
         >
           {opt}
@@ -243,26 +243,26 @@ export default function Settings() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-300 pb-20">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white dark:text-white">Settings</h1>
+        <h1 className="font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">Settings</h1>
         <p
-          className="text-[#737373] dark:text-[#737373] mt-1"
+          className="text-[var(--muted)] mt-1"
         >
           Configure your application preferences and manage your data.
         </p>
       </div>
 
       {/* ── GENERAL SETTINGS ── */}
-      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A] dark:ring-[#2A2A2A]">
-        <CardHeader className="border-b border-[#2A2A2A] dark:border-[#2A2A2A] pb-4">
-          <CardTitle className="flex items-center gap-2 text-white dark:text-white">
-            <Building2 size={20} className="text-[#2563EB]" /> General
-          </CardTitle>
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)]">
+        <CardHeader className="border-b border-[var(--border)] pb-4">
+            <CardTitle className="font-heading flex items-center gap-2 text-[var(--text-primary)]">
+             <Building2 size={20} className="text-[var(--primary)]" /> General
+           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5 pt-6">
           <div>
             <label
               htmlFor="settingsBusinessName"
-              className="block text-sm font-semibold text-[#A3A3A3] dark:text-[#A3A3A3] mb-1.5"
+              className="block text-sm font-semibold text-[var(--muted)] mb-1.5"
             >
               Business Name
             </label>
@@ -273,7 +273,7 @@ export default function Settings() {
               placeholder="Digi Moi"
               disabled={!canChangeSettings}
             />
-            <p className="text-xs text-[#737373] mt-1">
+            <p className="text-xs text-[var(--muted)] mt-1">
               Displayed on printed receipts.
             </p>
           </div>
@@ -281,7 +281,7 @@ export default function Settings() {
           <div>
             <label
               htmlFor="settingsReceiptPrefix"
-              className="block text-sm font-semibold text-[#A3A3A3] dark:text-[#A3A3A3] mb-1.5"
+              className="block text-sm font-semibold text-[var(--muted)] mb-1.5"
             >
               Receipt Prefix
             </label>
@@ -292,13 +292,13 @@ export default function Settings() {
               placeholder="Moi-"
               disabled={!canChangeSettings}
             />
-            <p className="text-xs text-[#737373] mt-1">
+            <p className="text-xs text-[var(--muted)] mt-1">
               Prepended to all receipt numbers (e.g., Moi-001).
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#A3A3A3] dark:text-[#A3A3A3] mb-2">
+            <label className="block text-sm font-semibold text-[var(--muted)] mb-2">
               Currency Symbol
             </label>
             <ToggleGroup
@@ -313,18 +313,18 @@ export default function Settings() {
       </Card>
 
       {/* ── APPEARANCE ── */}
-      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A] dark:ring-[#2A2A2A]">
-        <CardHeader className="border-b border-[#2A2A2A] dark:border-[#2A2A2A] pb-4">
-          <CardTitle className="flex items-center gap-2 text-white dark:text-white">
-            <Sun size={20} className="text-amber-500" /> Appearance
-          </CardTitle>
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)]">
+        <CardHeader className="border-b border-[var(--border)] pb-4">
+            <CardTitle className="font-heading flex items-center gap-2 text-[var(--text-primary)]">
+             <Sun size={20} className="text-amber-500" /> Appearance
+           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5 pt-6">
           <div>
-            <label className="block text-sm font-semibold text-[#A3A3A3] dark:text-[#A3A3A3] mb-2">
+            <label className="block text-sm font-semibold text-[var(--muted)] mb-2">
               Theme
             </label>
-            <div className="flex rounded-xl overflow-hidden border border-[#2A2A2A] dark:border-[#2A2A2A] max-w-xs">
+            <div className="flex rounded-xl overflow-hidden border border-[var(--border)] max-w-xs">
               <button
                 type="button"
                 onClick={() => {
@@ -333,8 +333,8 @@ export default function Settings() {
                 className={cn(
                   "px-4 py-2.5 text-sm font-semibold transition-all flex-1 flex items-center justify-center gap-2",
                   theme === "light"
-                    ? "bg-[#2563EB] text-white"
-                    : "bg-white dark:bg-[#161616] text-[#737373] dark:text-[#737373] hover:bg-[#2A2A2A] dark:hover:bg-[#2A2A2A]",
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--border-hover)]",
                 )}
               >
                 <Sun size={16} /> Light
@@ -347,8 +347,8 @@ export default function Settings() {
                 className={cn(
                   "px-4 py-2.5 text-sm font-semibold transition-all flex-1 flex items-center justify-center gap-2",
                   theme === "dark"
-                    ? "bg-[#2563EB] text-white"
-                    : "bg-white dark:bg-[#161616] text-[#737373] dark:text-[#737373] hover:bg-[#2A2A2A] dark:hover:bg-[#2A2A2A]",
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--card)] text-[var(--muted)] hover:bg-[var(--border-hover)]",
                 )}
               >
                 <Moon size={16} /> Dark
@@ -359,15 +359,15 @@ export default function Settings() {
       </Card>
 
       {/* ── PRINTING ── */}
-      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A] dark:ring-[#2A2A2A]">
-        <CardHeader className="border-b border-[#2A2A2A] dark:border-[#2A2A2A] pb-4">
-          <CardTitle className="flex items-center gap-2 text-white dark:text-white">
-            <Printer size={20} className="text-teal-500" /> Printing
-          </CardTitle>
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)]">
+        <CardHeader className="border-b border-[var(--border)] pb-4">
+            <CardTitle className="font-heading flex items-center gap-2 text-[var(--text-primary)]">
+             <Printer size={20} className="text-teal-500" /> Printing
+           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5 pt-6">
           <div>
-            <label className="block text-sm font-semibold text-[#A3A3A3] dark:text-[#A3A3A3] mb-2">
+            <label className="block text-sm font-semibold text-[var(--muted)] mb-2">
               Paper Width
             </label>
             <ToggleGroup
@@ -377,7 +377,7 @@ export default function Settings() {
               className="max-w-xs"
               disabled={!canChangeSettings}
             />
-            <p className="text-xs text-[#737373] mt-2">
+            <p className="text-xs text-[var(--muted)] mt-2">
               Standard thermal roll widths. Most POS printers use 58mm.
             </p>
           </div>
@@ -392,7 +392,7 @@ export default function Settings() {
           onClick={handleSave}
           isLoading={isSaving}
           disabled={!canChangeSettings}
-          className="min-w-40 shadow-md shadow-[#2563EB]/20"
+          className="min-w-40 shadow-md shadow-[var(--primary)]/20"
         >
           {saved ? (
             <>
@@ -407,20 +407,20 @@ export default function Settings() {
       </div>
 
       {/* ── DATA MANAGEMENT ── */}
-      <Card className="border-0 shadow-sm ring-1 ring-[#2A2A2A] dark:ring-[#2A2A2A]">
-        <CardHeader className="border-b border-[#2A2A2A] dark:border-[#2A2A2A] pb-4">
-          <CardTitle className="flex items-center gap-2 text-white dark:text-white">
-            <Download size={20} className="text-[#2563EB]" /> Data Management
-          </CardTitle>
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)]">
+        <CardHeader className="border-b border-[var(--border)] pb-4">
+            <CardTitle className="font-heading flex items-center gap-2 text-[var(--text-primary)]">
+             <Download size={20} className="text-[var(--primary)]" /> Data Management
+           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           {/* Backup */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 p-4 bg-[#161616] dark:bg-[#161616] rounded-xl border border-[#2A2A2A] dark:border-[#2A2A2A]">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 p-4 bg-[var(--card)] rounded-xl border border-[var(--border)]">
             <div>
-              <h3 className="font-semibold text-white dark:text-white">
+              <h3 className="font-semibold text-[var(--text-primary)]">
                 Backup Data
               </h3>
-              <p className="text-sm text-[#737373] dark:text-[#737373] mt-0.5">
+              <p className="text-sm text-[var(--muted)] mt-0.5">
                 Download all events, entries, and settings as a JSON file.
               </p>
             </div>
@@ -434,12 +434,12 @@ export default function Settings() {
           </div>
 
           {/* Restore */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 p-4 bg-[#161616] dark:bg-[#161616] rounded-xl border border-[#2A2A2A] dark:border-[#2A2A2A]">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 p-4 bg-[var(--card)] rounded-xl border border-[var(--border)]">
             <div>
-              <h3 className="font-semibold text-white dark:text-white">
+              <h3 className="font-semibold text-[var(--text-primary)]">
                 Restore Data
               </h3>
-              <p className="text-sm text-[#737373] dark:text-[#737373] mt-0.5">
+              <p className="text-sm text-[var(--muted)] mt-0.5">
                 Import a previously exported JSON backup. This will replace all
                 current data.
               </p>
@@ -463,12 +463,12 @@ export default function Settings() {
           </div>
 
           {/* Factory Reset */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 p-4 bg-[#161616] dark:bg-[#161616] rounded-xl border border-[#2A2A2A] dark:border-[#2A2A2A]">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 p-4 bg-[var(--card)] rounded-xl border border-[var(--border)]">
             <div>
-              <h3 className="font-semibold text-red-600 dark:text-red-400">
+              <h3 className="font-semibold text-[var(--danger)]">
                 Factory Reset
               </h3>
-              <p className="text-sm text-[#737373] dark:text-[#737373] mt-0.5">
+              <p className="text-sm text-[var(--muted)] mt-0.5">
                 Permanently erase all events, entries, and settings. Cannot be
                 undone.
               </p>
@@ -476,7 +476,7 @@ export default function Settings() {
             <Button
               variant="ghost"
               onClick={() => setResetConfirm(true)}
-              className="text-red-600 hover:bg-[#2A2A2A] dark:hover:bg-[#2A2A2A] shrink-0"
+              className="text-[var(--danger)] hover:bg-[var(--border-hover)] shrink-0"
             >
               <RotateCcw size={16} className="mr-2" /> Reset Everything
             </Button>

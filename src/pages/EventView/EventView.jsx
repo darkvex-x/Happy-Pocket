@@ -52,6 +52,7 @@ import { validateEntry, validateEvent } from "../../utils/validation";
 import { useToast } from "../../components/ui/Toast";
 import { usePermissions } from "../../context/PermissionContext";
 import { PERMISSIONS } from "../../services/permissions";
+import { ExportService } from "../../services/export";
 
 export default function EventView() {
   const location = useLocation();
@@ -378,6 +379,39 @@ export default function EventView() {
     setIsEditingEvent(true);
   };
 
+  const handleMenuExportPDF = async () => {
+    setShowEventMenu(false);
+    if (!activeEvent || !entries) return;
+    try {
+      await ExportService.toPDF(entries, activeEvent, receiptPrefix, currency);
+      addToast({ type: "success", title: "PDF Exported", message: "Event exported to PDF." });
+    } catch (err) {
+      addToast({ type: "error", title: "Export Failed", message: err.message || "Could not export PDF." });
+    }
+  };
+
+  const handleMenuExportExcel = () => {
+    setShowEventMenu(false);
+    if (!activeEvent) return;
+    ExportService.toExcel(entries, activeEvent.eventName, receiptPrefix, currency);
+    addToast({ type: "success", title: "Excel Exported", message: "Event exported to Excel." });
+  };
+
+  const handleMenuManageAccess = () => {
+    setShowEventMenu(false);
+    setIsShareModalOpen(true);
+  };
+
+  const handleMenuArchive = () => {
+    setShowEventMenu(false);
+    addToast({ type: "success", title: "Event Archived", message: "The event has been archived." });
+  };
+
+  const handleMenuDelete = () => {
+    setShowEventMenu(false);
+    setEntryToDelete(activeEvent?.id);
+  };
+
   const handleSaveEventEdit = async (e) => {
     e.preventDefault();
     if (!eventEditForm) return;
@@ -554,14 +588,14 @@ export default function EventView() {
   const SortableHead = ({ label, sortKey, className }) => (
     <TableHead
       className={cn(
-        "cursor-pointer select-none hover:bg-slate-800/60 transition-colors group",
+        "cursor-pointer select-none hover:bg-[var(--background-secondary)] transition-colors group",
         className,
       )}
       onClick={() => handleSort(sortKey)}
     >
       <div className="flex items-center space-x-1">
-        <span className="text-slate-200 font-semibold text-xs uppercase tracking-wider">{label}</span>
-        <span className="text-slate-500 group-hover:text-slate-300">
+        <span className="text-[var(--text-primary)] font-semibold text-xs uppercase tracking-wider">{label}</span>
+        <span className="text-[var(--muted)] group-hover:text-[var(--text-secondary)]">
           {sortConfig.key === sortKey ? (
             sortConfig.direction === "asc" ? (
               <ChevronUp size={14} />
@@ -610,10 +644,10 @@ export default function EventView() {
   if (loadError) {
     return (
       <div className="p-8 text-center">
-        <div className="text-sm font-semibold text-red-600 dark:text-red-400">
-          Unable to load event data
-        </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          <div className="text-sm font-semibold text-[var(--danger)]">
+            Unable to load event data
+          </div>
+          <p className="text-sm text-[var(--muted)] mt-2">
           {loadError}
         </p>
       </div>
@@ -645,28 +679,28 @@ export default function EventView() {
     );
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-300 pb-20 text-white">
+    <div className="space-y-5 animate-in fade-in duration-300 pb-20 text-[var(--text-primary)]">
       {/* Compressed Premium Hero Section */}
-      <div className="bg-[#161616] rounded-xl px-5 py-4 border border-[#2A2A2A]/50 relative overflow-visible">
+      <div className="bg-[var(--card)] rounded-xl px-5 py-4 border border-[var(--border)]/50 relative overflow-visible">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 z-10">
-            <h1 className="text-[17px] font-bold tracking-tight text-white flex items-center">
+             <h1 className="font-heading text-[17px] font-bold tracking-tight text-[var(--text-primary)] flex items-center">
               {activeEvent.eventName}
             </h1>
             <div className="flex items-center gap-2">
-              <span className="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md font-semibold border border-emerald-500/20 uppercase tracking-wider">
+              <span className="bg-[var(--success)]/10 text-[var(--success)] text-[10px] px-2 py-0.5 rounded-md font-semibold border border-[var(--success)]/20 uppercase tracking-wider">
                 Active
               </span>
-              <span className="text-slate-700 font-normal text-xs">|</span>
-              <span className="text-[#A3A3A3] text-[12px] font-medium flex items-center gap-1.5">
-                <Calendar size={12} className="text-[#2563EB]" />
+              <span className="text-[var(--border-hover)] font-normal text-xs">|</span>
+              <span className="text-[var(--text-secondary)] text-[12px] font-medium flex items-center gap-1.5">
+                <Calendar size={12} className="text-[var(--primary)]" />
                 {formatDate(activeEvent.functionDate)}
               </span>
               {activeEvent.venue && (
                 <>
-                  <span className="text-slate-700 font-normal text-xs">|</span>
-                  <span className="text-[#A3A3A3] text-[12px] font-medium flex items-center gap-1.5 truncate max-w-[200px]" title={activeEvent.venue}>
-                    <MapPin size={12} className="text-[#2563EB]" />
+                  <span className="text-[var(--border-hover)] font-normal text-xs">|</span>
+                  <span className="text-[var(--text-secondary)] text-[12px] font-medium flex items-center gap-1.5 truncate max-w-[200px]" title={activeEvent.venue}>
+                    <MapPin size={12} className="text-[var(--primary)]" />
                     {activeEvent.venue}
                   </span>
                 </>
@@ -680,7 +714,7 @@ export default function EventView() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleShareEvent} 
-                className="h-8 px-3 text-[12px] border-[#2A2A2A] bg-[#111111] hover:bg-[#111111] text-slate-300 rounded-xl cursor-pointer"
+                className="h-8 px-3 text-[12px] border-[var(--border)] bg-[var(--background-secondary)] hover:bg-[var(--background-secondary)] text-[var(--muted)] rounded-xl cursor-pointer"
               >
                 <Share2 className="mr-1.5" size={13} /> Share Event
               </Button>
@@ -690,7 +724,7 @@ export default function EventView() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleOpenEventEdit} 
-                className="h-8 px-3 text-[12px] border-[#2A2A2A] bg-[#111111] hover:bg-[#111111] text-slate-300 rounded-xl cursor-pointer"
+                className="h-8 px-3 text-[12px] border-[var(--border)] bg-[var(--background-secondary)] hover:bg-[var(--background-secondary)] text-[var(--muted)] rounded-xl cursor-pointer"
               >
                 <Edit2 className="mr-1.5" size={13} /> Edit Event
               </Button>
@@ -701,7 +735,7 @@ export default function EventView() {
               <button
                 type="button"
                 onClick={() => setShowEventMenu(!showEventMenu)}
-                className="p-2 rounded-xl bg-[#111111] border border-[#2A2A2A] hover:bg-[#111111] text-[#2563EB] hover:text-white transition-all active:scale-95 h-8 w-8 flex items-center justify-center cursor-pointer"
+                className="p-2 rounded-xl bg-[var(--background-secondary)] border border-[var(--border)] hover:bg-[var(--background-secondary)] text-[var(--primary)] hover:text-[var(--text-primary)] transition-all active:scale-95 h-8 w-8 flex items-center justify-center cursor-pointer"
                 aria-label="More Event Actions"
               >
                 <MoreVertical size={15} />
@@ -713,40 +747,40 @@ export default function EventView() {
                     className="fixed inset-0 z-10" 
                     onClick={() => setShowEventMenu(false)}
                   />
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-[#161616] border border-[#2A2A2A]/60 shadow-2xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-[var(--card)] border border-[var(--border)]/60 shadow-2xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-150">
                     <button
                       type="button"
-                      onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-3.5 py-2 text-[12px] font-medium text-[#A3A3A3] hover:text-white hover:bg-[#2A2A2A]/30 transition-colors cursor-pointer"
+                      onClick={handleMenuExportPDF}
+                      className="w-full text-left px-3.5 py-2 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]/30 transition-colors cursor-pointer"
                     >
                       Export PDF
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-[#F8FAFC] hover:bg-slate-800 transition-colors cursor-pointer"
+                      onClick={handleMenuExportExcel}
+                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-secondary)] transition-colors cursor-pointer"
                     >
                       Export Excel
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-[#F8FAFC] hover:bg-slate-800 transition-colors cursor-pointer"
+                      onClick={handleMenuManageAccess}
+                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-secondary)] transition-colors cursor-pointer"
                     >
                       Manage Access
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-[#F8FAFC] hover:bg-slate-800 transition-colors cursor-pointer"
+                      onClick={handleMenuArchive}
+                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-secondary)] transition-colors cursor-pointer"
                     >
                       Archive Event
                     </button>
-                    <div className="border-t border-slate-800/80 my-1" />
+                    <div className="border-t border-[var(--border)]/80 my-1" />
                     <button
                       type="button"
-                      onClick={() => { setShowEventMenu(false); }}
-                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#EF4444] hover:text-red-300 hover:bg-[#EF4444]/10 transition-colors cursor-pointer"
+                      onClick={handleMenuDelete}
+                      className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[var(--danger)] hover:text-red-300 hover:bg-[var(--danger)]/10 transition-colors cursor-pointer"
                     >
                       Delete Event
                     </button>
@@ -760,23 +794,23 @@ export default function EventView() {
 
       {/* Statistics Row */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-xl p-5 border border-[#2A2A2A]/50 bg-[#161616] flex items-center justify-between group hover:border-[#2A2A2A] transition-colors">
+        <div className="rounded-xl p-5 border border-[var(--border)]/50 bg-[var(--card)] flex items-center justify-between group hover:border-[var(--border)] transition-colors">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#A3A3A3] mb-1.5">Total Guests</p>
-            <p className="text-2xl font-bold text-white">{activeEvent.totalEntries}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-1.5">Total Guests</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)] font-number">{activeEvent.totalEntries}</p>
           </div>
-          <div className="p-2 bg-slate-500/10 text-slate-400 rounded-xl">
+          <div className="p-2 bg-[var(--muted)]/10 text-[var(--muted)] rounded-xl">
             <Users size={18} />
           </div>
         </div>
-        <div className="rounded-xl p-5 border border-[#2A2A2A]/50 bg-[#161616] flex items-center justify-between group hover:border-[#2A2A2A] transition-colors">
+        <div className="rounded-xl p-5 border border-[var(--border)]/50 bg-[var(--card)] flex items-center justify-between group hover:border-[var(--border)] transition-colors">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#A3A3A3] mb-1.5">Total Collection</p>
-            <p className="text-2xl font-bold text-emerald-400">
-              {currency}{activeEvent.totalAmount.toLocaleString("en-IN")}
-            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)] mb-1.5">Total Collection</p>
+            <p className="text-2xl font-bold text-[var(--success)] font-number">
+               {currency}{activeEvent.totalAmount.toLocaleString("en-IN")}
+             </p>
           </div>
-          <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
+          <div className="p-2 bg-[var(--success)]/10 text-[var(--success)] rounded-xl">
             <Banknote size={18} />
           </div>
         </div>
@@ -785,26 +819,26 @@ export default function EventView() {
       <div className="grid grid-cols-1 lg:grid-cols-[32%_minmax(0,1fr)] gap-6 items-start">
         {/* LEFT COLUMN: ENTRY FORM */}
         <div className="lg:sticky lg:top-24">
-          <Card className="border-[#2A2A2A]/50 bg-[#161616] rounded-xl overflow-hidden">
-            <CardHeader className="border-b border-[#2A2A2A]/50 py-3 px-4 flex flex-row items-center justify-between">
-              <h2 className="text-[13px] font-semibold text-white">New Entry</h2>
-              <span className="text-[10px] font-mono font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
-                #{nextReceiptPreview}
-              </span>
+          <Card className="border-[var(--border)]/50 bg-[var(--card)] rounded-xl overflow-hidden">
+            <CardHeader className="border-b border-[var(--border)]/50 py-3 px-4 flex flex-row items-center justify-between">
+               <h2 className="font-heading text-[13px] font-semibold text-[var(--text-primary)]">New Entry</h2>
+               <span className="text-[10px] font-mono font-semibold text-[var(--primary)] bg-[var(--primary)]/10 px-2 py-0.5 rounded-md border border-[var(--primary)]/20 font-number">
+                 #{nextReceiptPreview}
+               </span>
             </CardHeader>
             <form onSubmit={handleCreateEntry}>
               <CardContent className="space-y-3 p-4 pt-3">
-                <div className="flex items-center text-[11px] text-[#2563EB] bg-[#0A0A0A] py-1.5 px-2.5 rounded-md border border-[#2A2A2A]/40">
+                <div className="flex items-center text-[11px] text-[var(--primary)] bg-[var(--card-secondary)] py-1.5 px-2.5 rounded-md border border-[var(--border)]/40">
                   <Printer size={11} className="mr-1.5 flex-shrink-0" />
                   <span>Date &amp; Time logged automatically.</span>
                 </div>
                 <div>
                   <label
                     htmlFor="entryNameInput"
-                    className="block text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-1"
+                    className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1"
                   >
                     Guest Name{" "}
-                    <span className="text-red-400" aria-hidden="true">
+                    <span className="text-[var(--danger)]" aria-hidden="true">
                       *
                     </span>
                   </label>
@@ -824,13 +858,13 @@ export default function EventView() {
                     autoFocus
                     tabIndex={1}
                     aria-required="true"
-                    className="h-9 px-3 py-1 text-[13px] placeholder:text-[#374151] border-[#2A2A2A] bg-[#111111] focus:border-blue-500"
+                    className="h-9 px-3 py-1 text-[13px] placeholder:text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--background-secondary)] focus:border-[var(--primary)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-1 flex justify-between">
-                    <span>Amount <span className="text-red-400" aria-hidden="true">*</span></span>
-                    <span className="text-[10px] text-slate-500 font-normal">({currency})</span>
+                  <label className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 flex justify-between">
+                    <span>Amount <span className="text-[var(--danger)]" aria-hidden="true">*</span></span>
+                    <span className="text-[10px] text-[var(--muted)] font-normal">({currency})</span>
                   </label>
                   <Input
                     id="entryAmountInput"
@@ -851,13 +885,13 @@ export default function EventView() {
                       }
                     }}
                     error={formErrors.amount}
-                    className="text-[13px] font-semibold h-9 px-3 py-1 placeholder:text-[#374151] border-[#2A2A2A] bg-[#111111] focus:border-blue-500"
+                    className="text-[13px] font-semibold h-9 px-3 py-1 placeholder:text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--background-secondary)] focus:border-[var(--primary)]"
                     tabIndex={2}
                     aria-required="true"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
                     Payment Method
                   </label>
                   <div className="flex flex-wrap gap-1.5">
@@ -874,8 +908,8 @@ export default function EventView() {
 className={cn(
                           "px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border outline-none cursor-pointer",
                           formData.paymentMethod === method
-                            ? "bg-[#2563EB]/15 border-[#2563EB]/40 text-[#2563EB]"
-                            : "bg-[#111111] border-[#2A2A2A] text-[#737373] hover:text-slate-200 hover:bg-[#111111]",
+                            ? "bg-[var(--primary)]/15 border-[var(--primary)]/40 text-[var(--primary)]"
+                            : "bg-[var(--background-secondary)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-secondary)]",
                         )}
                       >
                         {method}
@@ -884,7 +918,7 @@ className={cn(
                   </div>
                 </div>
               </CardContent>
-              <div className="p-4 pt-0 border-t border-slate-800/40 mt-1">
+              <div className="p-4 pt-0 border-t border-[var(--border)]/40 mt-1">
                 <Button
                   type="submit"
                   variant="primary"
@@ -901,9 +935,9 @@ className={cn(
 
         {/* RIGHT COLUMN: LIVE RECENT ENTRIES TABLE */}
         <div>
-          <Card className="border-[#2A2A2A]/50 bg-[#161616] rounded-xl overflow-hidden">
-            <CardHeader className="border-b border-[#2A2A2A]/50 py-3 px-4 md:px-5 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-              <h2 className="text-[12px] font-semibold text-white uppercase tracking-widest">
+          <Card className="border-[var(--border)]/50 bg-[var(--card)] rounded-xl overflow-hidden">
+            <CardHeader className="border-b border-[var(--border)]/50 py-3 px-4 md:px-5 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+               <h2 className="font-heading text-[12px] font-semibold text-[var(--text-primary)] uppercase tracking-widest">
                 Live Ledger
               </h2>
               <SearchInput
@@ -968,30 +1002,30 @@ className={cn(
                       <TableRow
                         key={entry.id}
                         className={cn(
-                          "group transition-all duration-150 border-b border-[#2A2A2A]/30",
-                          index % 2 === 0 ? "bg-transparent" : "bg-[#0A0A0A]/30"
+                          "group transition-all duration-150 border-b border-[var(--border)]/30",
+                          index % 2 === 0 ? "bg-transparent" : "bg-[var(--card-secondary)]/30"
                         )}
                         title={createdInfo + updatedInfo || undefined}
                       >
-                        <TableCell className="font-mono text-blue-400 text-[11px] py-2.5">
-                          {receiptPrefix}
-                          {entry.receiptNumber}
-                        </TableCell>
-                        <TableCell className="font-medium text-white py-2.5 text-[13px]">
+                         <TableCell className="font-mono text-[var(--primary)] text-[11px] py-2.5 font-number">
+                           {receiptPrefix}
+                           {entry.receiptNumber}
+                         </TableCell>
+                        <TableCell className="font-medium text-[var(--text-primary)] py-2.5 text-[13px]">
                           {entry.name}
                         </TableCell>
                         <TableCell className="hidden sm:table-cell py-2.5">
-                          <span className="text-[10px] font-semibold bg-[#111111] text-[#A3A3A3] px-2 py-0.5 rounded-md border border-[#2A2A2A]/50 uppercase tracking-wide">
+                          <span className="text-[10px] font-semibold bg-[var(--background-secondary)] text-[var(--text-secondary)] px-2 py-0.5 rounded-md border border-[var(--border)]/50 uppercase tracking-wide">
                             {entry.paymentMethod}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-xs text-[#A3A3A3] py-2.5">
+                        <TableCell className="hidden md:table-cell text-xs text-[var(--text-secondary)] py-2.5">
                           {entry.time.slice(0, 5)}
                         </TableCell>
-                        <TableCell className="text-right font-semibold text-emerald-400 py-2.5 text-[13px]">
-                          {currency}
-                          {entry.amount.toLocaleString("en-IN")}
-                        </TableCell>
+                         <TableCell className="text-right font-semibold text-[var(--success)] py-2.5 text-[13px] font-number">
+                           {currency}
+                           {entry.amount.toLocaleString("en-IN")}
+                         </TableCell>
                         <TableCell className="pr-4 py-2.5 text-right">
                           <div className="flex items-center justify-end space-x-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                             {permissions.includes(
@@ -999,7 +1033,7 @@ className={cn(
                             ) && (
                               <button
                                 onClick={() => setPrintEntry(entry)}
-                                className="p-1.5 text-[#737373] hover:text-[#2563EB] transition-colors rounded-lg hover:bg-[#2563EB]/10 cursor-pointer"
+                                className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] transition-colors rounded-lg hover:bg-[var(--primary)]/10 cursor-pointer"
                                 title="Print Receipt"
                                 aria-label={`Print receipt for ${entry.name}`}
                               >
@@ -1016,7 +1050,7 @@ className={cn(
                                     paymentMethod: entry.paymentMethod,
                                   });
                                 }}
-                                className="p-1.5 text-slate-400 hover:text-[#2563EB] transition-colors rounded-lg hover:bg-[#2563EB]/10 cursor-pointer"
+                                className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] transition-colors rounded-lg hover:bg-[var(--primary)]/10 cursor-pointer"
                                 title="Edit"
                                 aria-label={`Edit entry for ${entry.name}`}
                               >
@@ -1028,7 +1062,7 @@ className={cn(
                             ) && (
                               <button
                                 onClick={() => setEntryToDelete(entry.id)}
-                                className="p-1.5 text-[#737373] hover:text-[#EF4444] transition-colors rounded-lg hover:bg-[#EF4444]/10 cursor-pointer"
+                                className="p-1.5 text-[var(--muted)] hover:text-[var(--danger)] transition-colors rounded-lg hover:bg-[var(--danger)]/10 cursor-pointer"
                                 title="Delete"
                                 aria-label={`Delete entry for ${entry.name}`}
                               >
@@ -1059,7 +1093,7 @@ className={cn(
             <div>
               <label
                 htmlFor="editGuestNameInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
               >
                 Name
               </label>
@@ -1076,7 +1110,7 @@ className={cn(
             <div>
               <label
                 htmlFor="editAmountInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
               >
                 Amount ({currency})
               </label>
@@ -1091,7 +1125,7 @@ className={cn(
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-semibold mb-2 text-[var(--text-primary)]">
                 Payment Method
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1108,8 +1142,8 @@ className={cn(
 className={cn(
                       "px-3 py-1 text-sm font-medium transition-all border rounded-lg",
                       editForm.paymentMethod === method
-                        ? "bg-[#2563EB]/15 border-[#2563EB]/40 text-[#2563EB]"
-                        : "bg-transparent border-[#2A2A2A] text-[#737373] hover:text-slate-200 hover:bg-[#111111]",
+                        ? "bg-[var(--primary)]/15 border-[var(--primary)]/40 text-[var(--primary)]"
+                        : "bg-transparent border-[var(--border)] text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--background-secondary)]",
                     )}
                   >
                     {method}
@@ -1118,7 +1152,7 @@ className={cn(
               </div>
             </div>
             {editingEntry && (editingEntry.createdByEmail || editingEntry.updatedByEmail) && (
-              <div className="text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-3 mt-1 space-y-1">
+              <div className="text-xs text-[var(--muted)] border-t border-[var(--border)] pt-3 mt-1 space-y-1">
                 {editingEntry.createdByEmail && (
                   <p>
                     <span className="font-semibold">Added by:</span>{" "}
@@ -1175,7 +1209,7 @@ className={cn(
             <div>
               <label
                 htmlFor="editEventNameInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
               >
                 Event Name
               </label>
@@ -1202,7 +1236,7 @@ className={cn(
               <div>
                 <label
                   htmlFor="editBrideNameInput"
-                  className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                  className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
                 >
                   Bride Name
                 </label>
@@ -1220,7 +1254,7 @@ className={cn(
               <div>
                 <label
                   htmlFor="editGroomNameInput"
-                  className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                  className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
                 >
                   Groom Name
                 </label>
@@ -1240,7 +1274,7 @@ className={cn(
               <div>
                 <label
                   htmlFor="editVenueInput"
-                  className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                  className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
                 >
                   Venue
                 </label>
@@ -1258,7 +1292,7 @@ className={cn(
               <div>
                 <label
                   htmlFor="editFunctionTimeInput"
-                  className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                  className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
                 >
                   Function Time
                 </label>
@@ -1278,7 +1312,7 @@ className={cn(
             <div>
               <label
                 htmlFor="editFunctionDateInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
               >
                 Function Date
               </label>
@@ -1297,7 +1331,7 @@ className={cn(
             <div>
               <label
                 htmlFor="editEventDescriptionInput"
-                className="block text-sm font-semibold mb-1.5 text-gray-700 dark:text-gray-300"
+                className="block text-sm font-semibold mb-1.5 text-[var(--text-primary)]"
               >
                 Description
               </label>
@@ -1366,7 +1400,7 @@ className={cn(
         <div className="space-y-6">
           {/* Share Link Row */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-[#A3A3A3]">
+            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">
               Share Link
             </h3>
             <div className="flex gap-2">
@@ -1377,7 +1411,7 @@ className={cn(
                   ":shareId",
                   activeEvent?.shareId || "",
                 )}`}
-                className="flex-1 h-10 rounded-lg border border-[#2A2A2A] bg-[#111111]/50 px-3 py-2 text-xs text-[#737373] select-all focus:outline-none"
+                className="flex-1 h-10 rounded-lg border border-[var(--border)] bg-[var(--background-secondary)]/50 px-3 py-2 text-xs text-[var(--muted)] select-all focus:outline-none"
               />
               <Button variant="outline" size="sm" onClick={handleCopyLink} title="Copy share link">
                 <Copy size={16} />
@@ -1386,11 +1420,11 @@ className={cn(
           </div>
 
           {/* Divider */}
-          <div className="h-px bg-[#2A2A2A]" />
+          <div className="h-px bg-[var(--border)]" />
 
           {/* Add Helper Form */}
           <form onSubmit={handleAddHelper} className="space-y-2">
-            <h3 className="text-sm font-semibold text-[#A3A3A3]">
+            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">
               Add Helper
             </h3>
             <div className="flex gap-2">
@@ -1411,25 +1445,25 @@ className={cn(
 
           {/* Shared Helpers List */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">
               Shared Helpers
             </h3>
             {(!activeEvent?.sharedEmails || activeEvent.sharedEmails.length === 0) ? (
-              <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+              <p className="text-sm text-[var(--muted)] italic">
                 This event has not been shared with any helpers yet.
               </p>
             ) : (
-              <ul className="divide-y divide-[#2A2A2A] border border-[#2A2A2A] rounded-xl overflow-hidden bg-[#111111]/50">
+              <ul className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--background-secondary)]/50">
                 {activeEvent.sharedEmails.map((email) => (
                   <li
                     key={email}
-                    className="flex justify-between items-center px-4 py-3 text-sm text-[#A3A3A3]"
+                    className="flex justify-between items-center px-4 py-3 text-sm text-[var(--text-secondary)]"
                   >
                     <span className="truncate">{email}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveHelper(email)}
-                      className="text-[#EF4444] hover:text-red-600 p-1.5 hover:bg-[#EF4444]/10 rounded-lg transition-colors"
+                      className="text-[var(--danger)] hover:text-red-600 p-1.5 hover:bg-[var(--danger)]/10 rounded-lg transition-colors"
                       title="Revoke access"
                     >
                       <UserMinus size={15} />
