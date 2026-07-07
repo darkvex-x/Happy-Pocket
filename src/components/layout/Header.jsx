@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { Moon, Sun, ChevronRight, LogOut } from "lucide-react";
+import { Moon, Sun, ChevronRight, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { SettingsContext } from "../../context/SettingsContext";
 import { ROUTES } from "../../constants/routes";
 import { auth } from "../../firebase";
 
-export default function Header() {
+export default function Header({ sidebarOpen, onToggleSidebar }) {
   const { theme, toggleTheme } = useContext(SettingsContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,6 +41,16 @@ export default function Header() {
 
   return (
     <header className="h-16 border-b border-[var(--border)] bg-[var(--background-secondary)]/95 flex items-center justify-between px-5 sticky top-0 z-40 backdrop-blur-md">
+      {/* Left cluster: sidebar toggle + breadcrumbs */}
+      <div className="flex items-center gap-2 min-w-0">
+        <button
+          onClick={onToggleSidebar}
+          className="hidden md:flex w-8 h-8 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-secondary)] text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-hover)] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+        </button>
 {/* Breadcrumbs */}
        <div className="flex items-center gap-1.5 text-sm">
          {breadcrumbs.map((crumb, index) => (
@@ -59,10 +69,11 @@ export default function Header() {
              )}
            </React.Fragment>
          ))}
-       </div>
+        </div>
+      </div>
 
 {/* Right actions */}
-       <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
          <span className="hidden sm:block text-[11px] text-[var(--muted)] font-medium tracking-wide">
            {new Date().toLocaleDateString("en-US", {
              weekday: "short",
@@ -75,14 +86,14 @@ export default function Header() {
            className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--card-secondary)] text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-hover)] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
            aria-label="Toggle Theme"
          >
-           {theme === "light" ? <Moon size={14} /> : <Sun size={14} />}
+           {theme === "light" ? <Moon size={25} /> : <Sun size={25} />}
          </button>
          <button
            onClick={handleLogout}
            className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[var(--border)] bg-[var(--card-secondary)] text-[11px] font-semibold text-[var(--muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-hover)] transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
            aria-label="Logout"
          >
-           <LogOut size={13} />
+           <LogOut size={20} />
            <span className="hidden sm:inline">Logout</span>
          </button>
        </div>

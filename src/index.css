@@ -9,6 +9,10 @@
   --color-primary-700: #1A365D;
 }
 
+/* Enable class-based dark mode so toggling the `.dark` class on <html> works.
+   Tailwind v4 defaults to prefers-color-scheme otherwise. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #FFFFFF;
   --background-secondary: #F8FAFC;

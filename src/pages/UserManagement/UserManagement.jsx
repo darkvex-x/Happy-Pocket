@@ -10,6 +10,8 @@ import {
   Search,
   ShieldCheck,
   Shield,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import {
   Card,
@@ -119,6 +121,157 @@ export default function UserManagement() {
     () => users.filter((u) => u.role === "admin").length,
     [users],
   );
+
+  // Collapse state for role groups — Admins first, Helpers expanded by default
+  const [collapsed, setCollapsed] = useState({ admin: false, helper: false });
+  const toggleGroup = (key) =>
+    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  // Grouped user lists (Admins first, then Helpers)
+  const adminUsers = useMemo(
+    () => filteredUsers.filter((u) => u.role === "admin"),
+    [filteredUsers],
+  );
+  const helperUsers = useMemo(
+    () => filteredUsers.filter((u) => u.role !== "admin"),
+    [filteredUsers],
+  );
+
+  // Shared row renderer for a single user
+  const renderUserRow = (user) => {
+    const isSelf =
+      user.uid === currentUserId ||
+      (user.email || "").toLowerCase() === currentUserEmail;
+    const isLastAdmin = user.role === "admin" && adminCount <= 1;
+    const deleteBlocked = isSelf || isLastAdmin;
+
+    return (
+      <TableRow
+        key={user.id}
+        className="hover:bg-[var(--border)] transition-colors"
+      >
+        <TableCell className="font-medium">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] text-sm font-bold">
+              {(user.name || user.email || "?")
+                .charAt(0)
+                .toUpperCase()}
+            </div>
+            <div>
+              <p className="font-medium text-[var(--text-primary)]">
+                {user.name || "—"}
+                {isSelf && (
+                  <span className="ml-2 text-xs text-[var(--primary)] font-normal">
+                    (you)
+                  </span>
+                )}
+              </p>
+              <p className="md:hidden text-xs text-[var(--muted)] mt-0.5">
+                {user.email || "—"}
+              </p>
+            </div>
+          </div>
+        </TableCell>
+        <TableCell className="hidden md:table-cell text-[var(--muted)]">
+          {user.email || "—"}
+        </TableCell>
+        <TableCell>
+          <Badge
+            variant={user.role === "admin" ? "primary" : "default"}
+            className="gap-1"
+          >
+            {user.role === "admin" ? (
+              <ShieldCheck size={12} />
+            ) : (
+              <Shield size={12} />
+            )}
+            {ROLE_LABELS[user.role] || user.role || "Helper"}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <Badge variant={user.active === false ? "danger" : "success"}>
+            {user.active === false ? "Disabled" : "Active"}
+          </Badge>
+        </TableCell>
+        <TableCell className="hidden lg:table-cell text-[var(--muted)] text-sm">
+          {user.createdAt
+            ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+            : "—"}
+        </TableCell>
+        <TableCell className="hidden xl:table-cell text-[var(--muted)] text-sm">
+          {user.lastLoginAt
+            ? new Date(user.lastLoginAt).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+            : "—"}
+        </TableCell>
+        <TableCell className="text-right">
+          <div className="flex items-center justify-end gap-1">
+            {/* Edit */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => openEditModal(user)}
+              title="Edit user"
+            >
+              <Edit2 size={15} />
+            </Button>
+
+            {/* Disable / Enable */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setToggleUser(user)}
+              title={
+                user.active === false ? "Enable user" : "Disable user"
+              }
+              className={
+                user.active === false
+                  ? "text-[var(--success)] hover:text-[var(--success)]/80"
+                  : "text-[var(--warning)] hover:text-[var(--warning)]/80"
+              }
+            >
+              {user.active === false ? (
+                <UserCheck size={15} />
+              ) : (
+                <UserX size={15} />
+              )}
+            </Button>
+
+            {/* Permanent Delete */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteClick(user)}
+              title={
+                isSelf
+                  ? "Cannot delete your own account"
+                  : isLastAdmin
+                    ? "Cannot delete the only admin"
+                    : "Permanently delete user"
+              }
+              className={
+                deleteBlocked
+                  ? "text-[var(--muted)] cursor-not-allowed"
+                  : "text-[var(--danger)] hover:text-[var(--danger)]/80"
+              }
+            >
+              <Trash2 size={15} />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    );
+  };
 
   // ── Form Handlers ──
 
@@ -349,157 +502,26 @@ export default function UserManagement() {
               actionLabel={!searchQuery ? "Add Helper" : undefined}
               onAction={!searchQuery ? openAddModal : undefined}
             />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden lg:table-cell">
-                    Added On
-                  </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => {
-                  const isSelf =
-                    user.uid === currentUserId ||
-                    (user.email || "").toLowerCase() === currentUserEmail;
-                  const isLastAdmin = user.role === "admin" && adminCount <= 1;
-                  const deleteBlocked = isSelf || isLastAdmin;
-
-                  return (
-                    <TableRow
-                      key={user.id}
-                      className="hover:bg-[var(--border)] transition-colors"
-                    >
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] text-sm font-bold">
-                            {(user.name || user.email || "?")
-                              .charAt(0)
-                              .toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-medium text-[var(--text-primary)]">
-                              {user.name || "—"}
-                              {isSelf && (
-                                <span className="ml-2 text-xs text-[var(--primary)] font-normal">
-                                  (you)
-                                </span>
-                              )}
-                            </p>
-                            <p className="md:hidden text-xs text-[var(--muted)] mt-0.5">
-                              {user.email || "—"}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell text-[var(--muted)]">
-                        {user.email || "—"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            user.role === "admin" ? "primary" : "default"
-                          }
-                          className="gap-1"
-                        >
-                          {user.role === "admin" ? (
-                            <ShieldCheck size={12} />
-                          ) : (
-                            <Shield size={12} />
-                          )}
-                          {ROLE_LABELS[user.role] || user.role || "Helper"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            user.active === false ? "danger" : "success"
-                          }
-                        >
-                          {user.active === false ? "Disabled" : "Active"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell text-[var(--muted)] text-sm">
-                        {user.createdAt
-                          ? new Date(user.createdAt).toLocaleDateString(
-                              "en-IN",
-                              {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {/* Edit */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditModal(user)}
-                            title="Edit user"
-                          >
-                            <Edit2 size={15} />
-                          </Button>
-
-                          {/* Disable / Enable */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setToggleUser(user)}
-                            title={
-                              user.active === false
-                                ? "Enable user"
-                                : "Disable user"
-                            }
-                            className={
-                              user.active === false
-                                ? "text-[var(--success)] hover:text-[var(--success)]/80"
-                                : "text-[var(--warning)] hover:text-[var(--warning)]/80"
-                            }
-                          >
-                            {user.active === false ? (
-                              <UserCheck size={15} />
-                            ) : (
-                              <UserX size={15} />
-                            )}
-                          </Button>
-
-                          {/* Permanent Delete */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteClick(user)}
-                            title={
-                              isSelf
-                                ? "Cannot delete your own account"
-                                : isLastAdmin
-                                  ? "Cannot delete the only admin"
-                                  : "Permanently delete user"
-                            }
-                            className={
-                              deleteBlocked
-                                ? "text-[var(--muted)] cursor-not-allowed"
-                                : "text-[var(--danger)] hover:text-[var(--danger)]/80"
-                            }
-                          >
-                            <Trash2 size={15} />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
+           ) : (
+            <>
+              <UserGroup
+                title="Admins"
+                icon={<ShieldCheck size={16} className="text-[var(--primary)]" />}
+                users={adminUsers}
+                collapsed={collapsed.admin}
+                onToggle={() => toggleGroup("admin")}
+                renderRow={renderUserRow}
+              />
+              <UserGroup
+                title="Helpers"
+                icon={<Shield size={16} className="text-[var(--muted)]" />}
+                users={helperUsers}
+                collapsed={collapsed.helper}
+                onToggle={() => toggleGroup("helper")}
+                renderRow={renderUserRow}
+              />
+            </>
+           )}
         </CardContent>
       </Card>
 
@@ -619,6 +641,53 @@ export default function UserManagement() {
         isDanger
         isLoading={isDeleting}
       />
+    </div>
+  );
+}
+
+/**
+ * Collapsible group of users (e.g. Admins / Helpers). Renders a table of
+ * rows produced by the provided `renderRow` function.
+ */
+function UserGroup({ title, icon, users, collapsed, onToggle, renderRow }) {
+  if (!users || users.length === 0) return null;
+
+  return (
+    <div className="border-b border-[var(--border)] last:border-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-6 py-3 bg-[var(--background-secondary)] hover:bg-[var(--border-hover)] transition-colors"
+      >
+        <span className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
+          {icon}
+          {title}
+          <Badge variant="default" className="font-number">
+            {users.length}
+          </Badge>
+        </span>
+        {collapsed ? (
+          <ChevronRight size={18} className="text-[var(--muted)]" />
+        ) : (
+          <ChevronDown size={18} className="text-[var(--muted)]" />
+        )}
+      </button>
+      {!collapsed && (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden lg:table-cell">Added On</TableHead>
+              <TableHead className="hidden xl:table-cell">Last Login</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>{users.map(renderRow)}</TableBody>
+        </Table>
+      )}
     </div>
   );
 }

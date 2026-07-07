@@ -16,6 +16,10 @@ import {
 } from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import Badge from "../../components/ui/Badge";
+import Skeleton from "../../components/ui/Skeleton";
+import EmptyState from "../../components/ui/EmptyState";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import {
   Save,
@@ -27,12 +31,16 @@ import {
   Printer,
   Building2,
   Check,
+  Eye,
+  ShieldCheck,
+  Shield,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useToast } from "../../components/ui/Toast";
 import { PAPER_OPTIONS, CURRENCY_OPTIONS } from "../../constants/receipt";
 import { usePermissions } from "../../context/PermissionContext";
-import { PERMISSIONS } from "../../services/permissions";
+import { PERMISSIONS, ROLE_LABELS } from "../../services/permissions";
+import { formatDateTime } from "../../utils/date";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -62,6 +70,30 @@ export default function Settings() {
   const [resetConfirm, setResetConfirm] = useState(false);
   const [restoreConfirm, setRestoreConfirm] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
+
+  // ── User Access Viewer ──
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUsers, setViewerUsers] = useState([]);
+  const [viewerLoading, setViewerLoading] = useState(false);
+
+  const openViewer = async () => {
+    setViewerOpen(true);
+    setViewerLoading(true);
+    try {
+      const all = await StorageService.getUsers();
+      setViewerUsers(all);
+    } catch (err) {
+      console.error(err);
+      addToast({
+        type: "error",
+        title: "Could Not Load Users",
+        message: err.message || "Failed to fetch user activity.",
+      });
+      setViewerUsers([]);
+    } finally {
+      setViewerLoading(false);
+    }
+  };
 
   const loadSettings = useCallback(async () => {
     setIsLoading(true);
@@ -384,6 +416,25 @@ export default function Settings() {
         </CardContent>
       </Card>
 
+      {/* ── USER ACCESS VIEWER ── */}
+      <Card className="border-0 shadow-sm ring-1 ring-[var(--border)]">
+        <CardHeader className="border-b border-[var(--border)] pb-4">
+          <CardTitle className="font-heading flex items-center gap-2 text-[var(--text-primary)]">
+            <Eye size={20} className="text-indigo-500" /> User Access Viewer
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 pt-6">
+          <p className="text-sm text-[var(--muted)]">
+            View everyone who has access to this app and when they last signed
+            in. This is read-only and lets you audit users without deleting
+            them.
+          </p>
+          <Button variant="outline" onClick={openViewer} className="shrink-0">
+            <Eye size={16} className="mr-2" /> Open Viewer
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* ── SAVE BUTTON ── */}
       <div className="flex justify-end">
         <Button
@@ -509,6 +560,113 @@ export default function Settings() {
         cancelText="Cancel"
         isDanger={true}
       />
+
+      {/* ── User Access Viewer Modal ── */}
+      <Modal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        title="User Access Viewer"
+        size="lg"
+      >
+        <UserAccessList users={viewerUsers} loading={viewerLoading} />
+      </Modal>
+    </div>
+  );
+}
+
+/**
+ * Read-only grouped list of all users with their access and login activity.
+ * Admins are shown first, then helpers.
+ */
+function UserAccessList({ users, loading }) {
+  if (loading) {
+    return (
+      <div className="p-2 space-y-4">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+      </div>
+    );
+  }
+
+  if (!users || users.length === 0) {
+    return (
+      <EmptyState
+        icon={Eye}
+        title="No users found"
+        description="There are no user records to display yet."
+      />
+    );
+  }
+
+  const admins = users.filter((u) => u.role === "admin");
+  const helpers = users.filter((u) => u.role !== "admin");
+
+  const Group = ({ title, list, icon: Icon, accent }) => {
+    if (list.length === 0) return null;
+    return (
+      <div className="mb-5">
+        <div className="flex items-center gap-2 px-1 pb-2">
+          <Icon size={16} className={accent} />
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm uppercase tracking-wide">
+            {title}
+          </h3>
+          <Badge variant="default" className="font-number">
+            {list.length}
+          </Badge>
+        </div>
+        <div className="space-y-2">
+          {list.map((u) => (
+            <div
+              key={u.id}
+              className="flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--card)]"
+            >
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] text-sm font-bold">
+                {(u.name || u.email || "?").charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium text-[var(--text-primary)] truncate">
+                    {u.name || "—"}
+                  </p>
+                  <Badge
+                    variant={u.role === "admin" ? "primary" : "default"}
+                    className="gap-1"
+                  >
+                    {u.role === "admin" ? (
+                      <ShieldCheck size={11} />
+                    ) : (
+                      <Shield size={11} />
+                    )}
+                    {ROLE_LABELS[u.role] || u.role || "Helper"}
+                  </Badge>
+                  <Badge variant={u.active === false ? "danger" : "success"}>
+                    {u.active === false ? "Disabled" : "Active"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-[var(--muted)] truncate">
+                  {u.email || "—"}
+                </p>
+                <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1 text-[11px] text-[var(--text-secondary)]">
+                  <span>
+                    Joined: {formatDateTime(u.createdAt) || "—"}
+                  </span>
+                  <span>
+                    Last Login: {formatDateTime(u.lastLoginAt) || "Never"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-h-[60vh] overflow-auto pr-1">
+      <Group title="Admins" list={admins} icon={ShieldCheck} accent="text-[var(--primary)]" />
+      <Group title="Helpers" list={helpers} icon={Shield} accent="text-[var(--muted)]" />
     </div>
   );
 }

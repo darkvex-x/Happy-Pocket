@@ -32,6 +32,7 @@ export function formatDateTime(dateTimeString) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: true,
   });
 }
 
@@ -41,4 +42,22 @@ export function formatDateTime(dateTimeString) {
  */
 export function getTodayString() {
   return new Date().toISOString().split('T')[0];
+}
+
+/**
+ * Formats a 24-hour "HH:MM" time string into 12-hour format with AM/PM
+ * (e.g. "14:30" -> "2:30 PM", "09:05" -> "9:05 AM").
+ * @param {string} timeString
+ * @returns {string}
+ */
+export function formatTime(timeString) {
+  if (!timeString) return '';
+  const parts = String(timeString).split(':');
+  let hour = parseInt(parts[0], 10);
+  const minute = parseInt(parts[1] || '0', 10);
+  if (Number.isNaN(hour)) return timeString;
+  const period = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+  return `${hour}:${String(minute).padStart(2, '0')} ${period}`;
 }

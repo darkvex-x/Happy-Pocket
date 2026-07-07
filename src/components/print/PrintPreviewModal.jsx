@@ -65,8 +65,8 @@ export default function PrintPreviewModal({ isOpen, onClose, entry, event }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Print Receipt Preview" size="md">
       <div className="flex flex-col gap-4">
 
-        {/* ── Controls ── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+        {/* ── Controls (sticky top toolbar) ── */}
+        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
           
           {/* Paper width toggle */}
           <div className="flex items-center gap-2">

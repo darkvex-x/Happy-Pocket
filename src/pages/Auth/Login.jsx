@@ -98,6 +98,7 @@ export default function Login() {
         email: firebaseUser.email || whitelisted.email || "",
         photoURL: firebaseUser.photoURL || whitelisted.photoURL || "",
         role: whitelisted.role || "admin",
+        lastLoginAt: new Date().toISOString(),
       },
       { merge: true },
     );

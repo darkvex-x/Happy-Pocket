@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { formatDate } from '../../utils/date';
+import { formatDate, formatTime } from '../../utils/date';
 
 /**
  * ThermalReceipt
@@ -44,7 +44,7 @@ const ThermalReceipt = forwardRef(({ entry, event, settings, paperWidth = '58mm'
     : formatDate(new Date().toISOString().split('T')[0], { day: '2-digit', month: 'short', year: 'numeric' });
 
   const receiptTime = entry?.time
-    ? entry.time.slice(0, 5)
+    ? formatTime(entry.time)
     : new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   if (!entry) {

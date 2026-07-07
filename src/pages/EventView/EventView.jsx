@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { formatDate } from "../../utils/date";
+import { formatDate, formatTime } from "../../utils/date";
 import { StorageService } from "../../services/storage";
 import { ROUTES } from "../../constants/routes";
 import { PAYMENT_METHODS } from "../../constants/paymentMethods";
@@ -1020,7 +1020,7 @@ className={cn(
                           </span>
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-xs text-[var(--text-secondary)] py-2.5">
-                          {entry.time.slice(0, 5)}
+                          {formatTime(entry.time)}
                         </TableCell>
                          <TableCell className="text-right font-semibold text-[var(--success)] py-2.5 text-[13px] font-number">
                            {currency}
